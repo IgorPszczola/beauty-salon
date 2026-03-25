@@ -42,3 +42,4 @@ build/
 
 *.log
 .DS_Store
+test.http
