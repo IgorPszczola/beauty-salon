@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <title>Salon Beauty - Panel Rezerwacji</title>
+    <style>
+        body { font-family: sans-serif; margin: 40px; background: #f4f4f4; }
+        .container { background: white; padding: 20px; border-radius: 8px; shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        h1 { color: #d63384; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { padding: 12px; border: 1px solid #ddd; text-align: left; }
+        th { background: #d63384; color: white; }
+        .refresh-btn { background: #d63384; color: white; border: none; padding: 10px 20px; cursor: pointer; border-radius: 5px; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>💅 System Rezerwacji Salonu</h1>
+    <button class="refresh-btn" onclick="loadData()">Odśwież dane</button>
+
+    <h2>Dostępne Usługi</h2>
+    <table id="servicesTable">
+        <thead>
+            <tr>
+                <th>ID</th><th>Nazwa</th><th>Cena</th><th>Czas (min)</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+
+    <h2>Zaplanowane Wizyty</h2>
+    <table id="appointmentsTable">
+        <thead>
+            <tr>
+                <th>Klient</th><th>Data</th><th>Usługa</th><th>Status</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+</div>
+
+<script>
+    async function loadData() {
+        // Pobieranie Usług
+        const resServices = await fetch('http://localhost:8081/api/services');
+        const services = await resServices.json();
+        const sBody = document.querySelector('#servicesTable tbody');
+        sBody.innerHTML = services.map(s => `
+            <tr><td>${s.id}</td><td>${s.name}</td><td>${s.price} zł</td><td>${s.duration}</td></tr>
+        `).join('');
+
+        // Pobieranie Wizyt
+        const resApps = await fetch('http://localhost:8081/api/appointments');
+        const apps = await resApps.json();
+        const aBody = document.querySelector('#appointmentsTable tbody');
+        aBody.innerHTML = apps.map(a => `
+            <tr>
+                <td>${a.clientName}</td>
+                <td>${new Date(a.appointmentTime).toLocaleString()}</td>
+                <td>${a.service ? a.service.name : 'Brak'}</td>
+                <td>${a.status}</td>
+            </tr>
+        `).join('');
+    }
+
+    // Ładuj dane na starcie
+    loadData();
+</script>
+
+</body>
+</html>
