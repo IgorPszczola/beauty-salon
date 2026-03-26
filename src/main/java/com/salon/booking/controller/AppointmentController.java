@@ -1,15 +1,13 @@
 package com.salon.booking.controller;
 
 import com.salon.booking.model.Appointment;
+import com.salon.booking.model.Service;
 import com.salon.booking.repository.AppointmentRepository;
+import com.salon.booking.repository.ServiceRepository;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-
-
 
 @RestController
 @RequestMapping("/api/appointments")
@@ -17,23 +15,58 @@ import org.springframework.web.bind.annotation.RequestParam;
 public class AppointmentController {
 
     private final AppointmentRepository appointmentRepository;
+    private final ServiceRepository serviceRepository;
 
-    public AppointmentController(AppointmentRepository appointmentRepository){
+    public AppointmentController(AppointmentRepository appointmentRepository, ServiceRepository serviceRepository){
         this.appointmentRepository = appointmentRepository;
+        this.serviceRepository = serviceRepository;
     }
 
     @GetMapping
-    public List<Appointment> getAllAppointments(){
-        return appointmentRepository.findAll();
+    public List<AppointmentResponse> getAllAppointments(){
+        return appointmentRepository.findAll().stream()
+                .map(this::toAppointmentResponse)
+                .toList();
     }    
 
     @PostMapping
-    public Appointment createAppointment(@Valid @RequestBody Appointment appointment){
-        return appointmentRepository.save(appointment);
+    public AppointmentResponse createAppointment(@Valid @RequestBody CreateAppointmentRequest request){
+        Service service = serviceRepository.findById(request.getServiceId())
+                .orElseThrow(() -> new FieldValidationException("serviceId", "Selected service does not exist"));
+
+        Appointment appointment = new Appointment();
+        appointment.setClientName(request.getClientName());
+        appointment.setAppointmentTime(request.getAppointmentTime());
+        appointment.setStatus(request.getStatus());
+        appointment.setService(service);
+
+        Appointment savedAppointment = appointmentRepository.save(appointment);
+        return toAppointmentResponse(savedAppointment);
     }
 
     @DeleteMapping("/delete/{id}")
     public void deleteAppointment(@PathVariable Long id){
         appointmentRepository.deleteById(id);
+    }
+
+    private AppointmentResponse toAppointmentResponse(Appointment appointment) {
+        AppointmentServiceResponse serviceResponse = null;
+        if (appointment.getService() != null) {
+            Service service = appointment.getService();
+            serviceResponse = new AppointmentServiceResponse(
+                    service.getId(),
+                    service.getName(),
+                    service.getPrice(),
+                    service.getDuration()
+            );
+        }
+
+        return new AppointmentResponse(
+                appointment.getId(),
+                appointment.getClientName(),
+                appointment.getAppointmentTime(),
+                appointment.getStatus(),
+                serviceResponse
+        );
     }
 }

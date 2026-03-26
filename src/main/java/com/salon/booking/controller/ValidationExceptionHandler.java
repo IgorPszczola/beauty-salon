@@ -27,4 +27,16 @@ public class ValidationExceptionHandler {
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(body);
     }
+
+    @ExceptionHandler(FieldValidationException.class)
+    public ResponseEntity<Map<String, Object>> handleFieldValidationException(FieldValidationException exception) {
+        Map<String, String> fieldErrors = new HashMap<>();
+        fieldErrors.put(exception.getField(), exception.getMessage());
+
+        Map<String, Object> body = new HashMap<>();
+        body.put("message", "Validation failed");
+        body.put("errors", fieldErrors);
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(body);
+    }
 }

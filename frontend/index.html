@@ -18,6 +18,19 @@
         .appointment-form button { background: #0d6efd; color: white; border: none; padding: 8px 14px; cursor: pointer; border-radius: 5px; }
         .field-group { display: flex; flex-direction: column; gap: 4px; }
         .field-error { min-height: 16px; color: #dc3545; font-size: 12px; }
+        .invalid-field { border-color: #dc3545 !important; outline: none; }
+        .service-form input:invalid,
+        .appointment-form input:invalid,
+        .appointment-form select:invalid {
+            border-color: #dc3545 !important;
+            box-shadow: 0 0 0 1px #dc3545;
+        }
+        .service-form input:invalid:focus,
+        .appointment-form input:invalid:focus,
+        .appointment-form select:invalid:focus {
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(220, 53, 69, 0.35);
+        }
     </style>
 </head>
 <body>
@@ -86,23 +99,41 @@
 </div>
 
 <script>
-    function clearFieldErrors(errorIds) {
-        errorIds.forEach((errorId) => {
+    function clearFieldErrors(mapping) {
+        Object.entries(mapping).forEach(([fieldName, config]) => {
+            const errorId = config.errorId;
             const errorNode = document.querySelector(`#${errorId}`);
             if (errorNode) {
                 errorNode.textContent = '';
+            }
+
+            const inputNode = document.querySelector(config.inputSelector);
+            if (inputNode) {
+                inputNode.classList.remove('invalid-field');
             }
         });
     }
 
     function showFieldErrors(errors, mapping) {
-        Object.entries(mapping).forEach(([fieldName, errorId]) => {
-            const errorNode = document.querySelector(`#${errorId}`);
+        Object.entries(mapping).forEach(([fieldName, config]) => {
+            const errorNode = document.querySelector(`#${config.errorId}`);
             if (!errorNode) {
                 return;
             }
 
-            errorNode.textContent = errors[fieldName] || '';
+            const fieldMessage = errors[fieldName] || '';
+            errorNode.textContent = fieldMessage;
+
+            const inputNode = document.querySelector(config.inputSelector);
+            if (!inputNode) {
+                return;
+            }
+
+            if (fieldMessage) {
+                inputNode.classList.add('invalid-field');
+            } else {
+                inputNode.classList.remove('invalid-field');
+            }
         });
     }
 
@@ -150,11 +181,11 @@
         event.preventDefault();
 
         const serviceErrorMapping = {
-            name: 'serviceNameError',
-            price: 'servicePriceError',
-            duration: 'serviceDurationError'
+            name: { errorId: 'serviceNameError', inputSelector: '#serviceName' },
+            price: { errorId: 'servicePriceError', inputSelector: '#servicePrice' },
+            duration: { errorId: 'serviceDurationError', inputSelector: '#serviceDuration' }
         };
-        clearFieldErrors(Object.values(serviceErrorMapping));
+        clearFieldErrors(serviceErrorMapping);
 
         const name = document.querySelector('#serviceName').value.trim();
         const price = Number(document.querySelector('#servicePrice').value);
@@ -196,12 +227,12 @@
         event.preventDefault();
 
         const appointmentErrorMapping = {
-            clientName: 'clientNameError',
-            appointmentTime: 'appointmentTimeError',
-            service: 'appointmentServiceError',
-            status: 'appointmentStatusError'
+            clientName: { errorId: 'clientNameError', inputSelector: '#clientName' },
+            appointmentTime: { errorId: 'appointmentTimeError', inputSelector: '#appointmentTime' },
+            serviceId: { errorId: 'appointmentServiceError', inputSelector: '#appointmentService' },
+            status: { errorId: 'appointmentStatusError', inputSelector: '#appointmentStatus' }
         };
-        clearFieldErrors(Object.values(appointmentErrorMapping));
+        clearFieldErrors(appointmentErrorMapping);
 
         const clientName = document.querySelector('#clientName').value.trim();
         const appointmentTime = document.querySelector('#appointmentTime').value;

@@ -18,12 +18,31 @@ public class ServiceController {
     }
 
     @GetMapping // maps HTTP GET requests to this method
-    public List<Service> getAllService(){
-        return serviceRepository.findAll();
+    public List<ServiceResponse> getAllService(){
+        return serviceRepository.findAll().stream()
+                .map(this::toServiceResponse)
+                .toList();
     }
 
     @PostMapping
-    public Service createService(@Valid @RequestBody Service service){ // @RequestBody tells Spring to parse the incoming JSON into a Service object
-        return serviceRepository.save(service);
+    public ServiceResponse createService(@Valid @RequestBody CreateServiceRequest request){
+        Service service = new Service();
+        service.setName(request.getName());
+        service.setDescription(request.getDescription());
+        service.setPrice(request.getPrice());
+        service.setDuration(request.getDuration());
+
+        Service savedService = serviceRepository.save(service);
+        return toServiceResponse(savedService);
+    }
+
+    private ServiceResponse toServiceResponse(Service service) {
+        return new ServiceResponse(
+                service.getId(),
+                service.getName(),
+                service.getDescription(),
+                service.getPrice(),
+                service.getDuration()
+        );
     }
 }
