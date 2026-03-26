@@ -16,6 +16,8 @@
         .service-form button { background: #198754; color: white; border: none; padding: 8px 14px; cursor: pointer; border-radius: 5px; }
         .appointment-form { margin-top: 16px; display: flex; gap: 10px; flex-wrap: wrap; }
         .appointment-form button { background: #0d6efd; color: white; border: none; padding: 8px 14px; cursor: pointer; border-radius: 5px; }
+        .field-group { display: flex; flex-direction: column; gap: 4px; }
+        .field-error { min-height: 16px; color: #dc3545; font-size: 12px; }
     </style>
 </head>
 <body>
@@ -26,9 +28,18 @@
 
     <h2>Dostępne Usługi</h2>
     <form id="addServiceForm" class="service-form">
-        <input type="text" id="serviceName" placeholder="Nazwa usługi" required>
-        <input type="number" id="servicePrice" placeholder="Cena" min="0" step="0.01" required>
-        <input type="number" id="serviceDuration" placeholder="Czas (min)" min="1" step="1" required>
+        <div class="field-group">
+            <input type="text" id="serviceName" placeholder="Nazwa usługi" required>
+            <small id="serviceNameError" class="field-error"></small>
+        </div>
+        <div class="field-group">
+            <input type="number" id="servicePrice" placeholder="Cena" min="0" step="0.01" required>
+            <small id="servicePriceError" class="field-error"></small>
+        </div>
+        <div class="field-group">
+            <input type="number" id="serviceDuration" placeholder="Czas (min)" min="1" step="1" required>
+            <small id="serviceDurationError" class="field-error"></small>
+        </div>
         <button type="submit">Dodaj usługę</button>
     </form>
 
@@ -43,12 +54,24 @@
 
     <h2>Zaplanowane Wizyty</h2>
     <form id="addAppointmentForm" class="appointment-form">
-        <input type="text" id="clientName" placeholder="Imię klienta" required>
-        <input type="datetime-local" id="appointmentTime" required>
-        <select id="appointmentService" required>
-            <option value="">Wybierz usługę</option>
-        </select>
-        <input type="text" id="appointmentStatus" placeholder="Status" value="NEW" required>
+        <div class="field-group">
+            <input type="text" id="clientName" placeholder="Imię klienta" required>
+            <small id="clientNameError" class="field-error"></small>
+        </div>
+        <div class="field-group">
+            <input type="datetime-local" id="appointmentTime" required>
+            <small id="appointmentTimeError" class="field-error"></small>
+        </div>
+        <div class="field-group">
+            <select id="appointmentService" required>
+                <option value="">Wybierz usługę</option>
+            </select>
+            <small id="appointmentServiceError" class="field-error"></small>
+        </div>
+        <div class="field-group">
+            <input type="text" id="appointmentStatus" placeholder="Status" value="NEW" required>
+            <small id="appointmentStatusError" class="field-error"></small>
+        </div>
         <button type="submit">Dodaj wizytę</button>
     </form>
 
@@ -63,6 +86,30 @@
 </div>
 
 <script>
+    function clearFieldErrors(errorIds) {
+        errorIds.forEach((errorId) => {
+            const errorNode = document.querySelector(`#${errorId}`);
+            if (errorNode) {
+                errorNode.textContent = '';
+            }
+        });
+    }
+
+    function showFieldErrors(errors, mapping) {
+        Object.entries(mapping).forEach(([fieldName, errorId]) => {
+            const errorNode = document.querySelector(`#${errorId}`);
+            if (!errorNode) {
+                return;
+            }
+
+            errorNode.textContent = errors[fieldName] || '';
+        });
+    }
+
+    async function parseErrorResponse(response) {
+        return response.json().catch(() => null);
+    }
+
     async function loadData() {
         // Pobieranie Usług
         const resServices = await fetch('http://localhost:8081/api/services');
@@ -102,6 +149,13 @@
     document.querySelector('#addServiceForm').addEventListener('submit', async (event) => {
         event.preventDefault();
 
+        const serviceErrorMapping = {
+            name: 'serviceNameError',
+            price: 'servicePriceError',
+            duration: 'serviceDurationError'
+        };
+        clearFieldErrors(Object.values(serviceErrorMapping));
+
         const name = document.querySelector('#serviceName').value.trim();
         const price = Number(document.querySelector('#servicePrice').value);
         const duration = Number(document.querySelector('#serviceDuration').value);
@@ -124,6 +178,12 @@
         });
 
         if (!response.ok) {
+            const errorBody = await parseErrorResponse(response);
+            if (response.status === 400 && errorBody && errorBody.errors) {
+                showFieldErrors(errorBody.errors, serviceErrorMapping);
+                return;
+            }
+
             alert('Nie udało się dodać usługi.');
             return;
         }
@@ -134,6 +194,14 @@
 
     document.querySelector('#addAppointmentForm').addEventListener('submit', async (event) => {
         event.preventDefault();
+
+        const appointmentErrorMapping = {
+            clientName: 'clientNameError',
+            appointmentTime: 'appointmentTimeError',
+            service: 'appointmentServiceError',
+            status: 'appointmentStatusError'
+        };
+        clearFieldErrors(Object.values(appointmentErrorMapping));
 
         const clientName = document.querySelector('#clientName').value.trim();
         const appointmentTime = document.querySelector('#appointmentTime').value;
@@ -161,6 +229,12 @@
         });
 
         if (!response.ok) {
+            const errorBody = await parseErrorResponse(response);
+            if (response.status === 400 && errorBody && errorBody.errors) {
+                showFieldErrors(errorBody.errors, appointmentErrorMapping);
+                return;
+            }
+
             alert('Nie udało się dodać wizyty.');
             return;
         }
