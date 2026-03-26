@@ -2,6 +2,7 @@ package com.salon.booking.controller;
 
 import com.salon.booking.model.Appointment;
 import com.salon.booking.repository.AppointmentRepository;
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -27,7 +28,7 @@ public class AppointmentController {
     }    
 
     @PostMapping
-    public Appointment createAppointment(@RequestBody Appointment appointment){
+    public Appointment createAppointment(@Valid @RequestBody Appointment appointment){
         return appointmentRepository.save(appointment);
     }
 

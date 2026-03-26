@@ -11,6 +11,11 @@
         th, td { padding: 12px; border: 1px solid #ddd; text-align: left; }
         th { background: #d63384; color: white; }
         .refresh-btn { background: #d63384; color: white; border: none; padding: 10px 20px; cursor: pointer; border-radius: 5px; }
+        .service-form { margin-top: 16px; display: flex; gap: 10px; flex-wrap: wrap; }
+        .service-form input, .appointment-form input, .appointment-form select { padding: 8px; border: 1px solid #ccc; border-radius: 5px; }
+        .service-form button { background: #198754; color: white; border: none; padding: 8px 14px; cursor: pointer; border-radius: 5px; }
+        .appointment-form { margin-top: 16px; display: flex; gap: 10px; flex-wrap: wrap; }
+        .appointment-form button { background: #0d6efd; color: white; border: none; padding: 8px 14px; cursor: pointer; border-radius: 5px; }
     </style>
 </head>
 <body>
@@ -20,6 +25,13 @@
     <button class="refresh-btn" onclick="loadData()">Odśwież dane</button>
 
     <h2>Dostępne Usługi</h2>
+    <form id="addServiceForm" class="service-form">
+        <input type="text" id="serviceName" placeholder="Nazwa usługi" required>
+        <input type="number" id="servicePrice" placeholder="Cena" min="0" step="0.01" required>
+        <input type="number" id="serviceDuration" placeholder="Czas (min)" min="1" step="1" required>
+        <button type="submit">Dodaj usługę</button>
+    </form>
+
     <table id="servicesTable">
         <thead>
             <tr>
@@ -30,10 +42,20 @@
     </table>
 
     <h2>Zaplanowane Wizyty</h2>
+    <form id="addAppointmentForm" class="appointment-form">
+        <input type="text" id="clientName" placeholder="Imię klienta" required>
+        <input type="datetime-local" id="appointmentTime" required>
+        <select id="appointmentService" required>
+            <option value="">Wybierz usługę</option>
+        </select>
+        <input type="text" id="appointmentStatus" placeholder="Status" value="NEW" required>
+        <button type="submit">Dodaj wizytę</button>
+    </form>
+
     <table id="appointmentsTable">
         <thead>
             <tr>
-                <th>Klient</th><th>Data</th><th>Usługa</th><th>Status</th>
+                <th>Klient</th><th>Data</th><th>Usługa</th><th>Status</th><th>Akcje</th>
             </tr>
         </thead>
         <tbody></tbody>
@@ -46,9 +68,14 @@
         const resServices = await fetch('http://localhost:8081/api/services');
         const services = await resServices.json();
         const sBody = document.querySelector('#servicesTable tbody');
+        const serviceSelect = document.querySelector('#appointmentService');
         sBody.innerHTML = services.map(s => `
             <tr><td>${s.id}</td><td>${s.name}</td><td>${s.price} zł</td><td>${s.duration}</td></tr>
         `).join('');
+        serviceSelect.innerHTML = `
+            <option value="">Wybierz usługę</option>
+            ${services.map(s => `<option value="${s.id}">${s.name} (${s.duration} min)</option>`).join('')}
+        `;
 
         // Pobieranie Wizyt
         const resApps = await fetch('http://localhost:8081/api/appointments');
@@ -71,6 +98,77 @@
 
     // Ładuj dane na starcie
     loadData();
+
+    document.querySelector('#addServiceForm').addEventListener('submit', async (event) => {
+        event.preventDefault();
+
+        const name = document.querySelector('#serviceName').value.trim();
+        const price = Number(document.querySelector('#servicePrice').value);
+        const duration = Number(document.querySelector('#serviceDuration').value);
+
+        if (!name || Number.isNaN(price) || Number.isNaN(duration)) {
+            alert('Uzupełnij poprawnie wszystkie pola usługi.');
+            return;
+        }
+
+        const response = await fetch('http://localhost:8081/api/services', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                name,
+                price,
+                duration
+            })
+        });
+
+        if (!response.ok) {
+            alert('Nie udało się dodać usługi.');
+            return;
+        }
+
+        event.target.reset();
+        loadData();
+    });
+
+    document.querySelector('#addAppointmentForm').addEventListener('submit', async (event) => {
+        event.preventDefault();
+
+        const clientName = document.querySelector('#clientName').value.trim();
+        const appointmentTime = document.querySelector('#appointmentTime').value;
+        const serviceId = Number(document.querySelector('#appointmentService').value);
+        const status = document.querySelector('#appointmentStatus').value.trim();
+
+        if (!clientName || !appointmentTime || Number.isNaN(serviceId) || !status) {
+            alert('Uzupełnij poprawnie wszystkie pola wizyty.');
+            return;
+        }
+
+        const response = await fetch('http://localhost:8081/api/appointments', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                clientName,
+                appointmentTime,
+                status,
+                service: {
+                    id: serviceId
+                }
+            })
+        });
+
+        if (!response.ok) {
+            alert('Nie udało się dodać wizyty.');
+            return;
+        }
+
+        event.target.reset();
+        document.querySelector('#appointmentStatus').value = 'NEW';
+        loadData();
+    });
 
     document.querySelector('#appointmentsTable tbody').addEventListener('click', async (event) => {
         const button = event.target.closest('.delete-btn');

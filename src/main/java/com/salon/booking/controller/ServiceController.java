@@ -2,6 +2,7 @@ package com.salon.booking.controller;
 
 import com.salon.booking.model.Service;
 import com.salon.booking.repository.ServiceRepository;
+import jakarta.validation.Valid;
 
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
@@ -22,7 +23,7 @@ public class ServiceController {
     }
 
     @PostMapping
-    public Service createService(@RequestBody Service service){ // @RequestBody tells Spring to parse the incoming JSON into a Service object
+    public Service createService(@Valid @RequestBody Service service){ // @RequestBody tells Spring to parse the incoming JSON into a Service object
         return serviceRepository.save(service);
     }
 }
