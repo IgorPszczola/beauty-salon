@@ -5,7 +5,7 @@
     <title>Salon Beauty - Panel Rezerwacji</title>
     <style>
         body { font-family: sans-serif; margin: 40px; background: #f4f4f4; }
-        .container { background: white; padding: 20px; border-radius: 8px; shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .container { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
         h1 { color: #d63384; }
         table { width: 100%; border-collapse: collapse; margin-top: 20px; }
         th, td { padding: 12px; border: 1px solid #ddd; text-align: left; }
@@ -55,17 +55,53 @@
         const apps = await resApps.json();
         const aBody = document.querySelector('#appointmentsTable tbody');
         aBody.innerHTML = apps.map(a => `
-            <tr>
-                <td>${a.clientName}</td>
-                <td>${new Date(a.appointmentTime).toLocaleString()}</td>
-                <td>${a.service ? a.service.name : 'Brak'}</td>
-                <td>${a.status}</td>
-            </tr>
+        <tr>
+            <td>${a.clientName}</td>
+            <td>${new Date(a.appointmentTime).toLocaleString()}</td>
+            <td>${a.service ? a.service.name : 'Brak'}</td>
+            <td>${a.status}</td>
+            <td>
+                <button type="button" class="delete-btn" data-id="${a.id}" style="background: #dc3545; color: white; border: none; padding: 5px 10px; cursor: pointer; border-radius: 3px;">
+                    Usuń
+                </button>
+            </td>
+        </tr>
         `).join('');
     }
 
     // Ładuj dane na starcie
     loadData();
+
+    document.querySelector('#appointmentsTable tbody').addEventListener('click', async (event) => {
+        const button = event.target.closest('.delete-btn');
+        if (!button) {
+            return;
+        }
+
+        const id = button.dataset.id;
+        if (!id) {
+            return;
+        }
+
+        await deleteApp(id);
+    });
+
+    async function deleteApp(id) {
+        if (!confirm('Na pewno chcesz usunąć tę wizytę?')) {
+            return;
+        }
+
+        const response = await fetch(`http://localhost:8081/api/appointments/delete/${id}`, {
+            method: 'DELETE'
+        });
+
+        if (!response.ok) {
+            alert('Nie udało się usunąć wizyty.');
+            return;
+        }
+
+        loadData();
+    }
 </script>
 
 </body>

@@ -30,4 +30,9 @@ public class AppointmentController {
     public Appointment createAppointment(@RequestBody Appointment appointment){
         return appointmentRepository.save(appointment);
     }
+
+    @DeleteMapping("/delete/{id}")
+    public void deleteAppointment(@PathVariable Long id){
+        appointmentRepository.deleteById(id);
+    }
 }
