@@ -1,4 +1,4 @@
-package com.salon.booking.controller;
+package com.salon.booking.dto;
 
 import java.time.LocalDateTime;
 

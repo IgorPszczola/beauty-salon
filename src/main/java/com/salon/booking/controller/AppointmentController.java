@@ -1,5 +1,8 @@
 package com.salon.booking.controller;
 
+import com.salon.booking.dto.CreateAppointmentRequest;
+import com.salon.booking.dto.AppointmentResponse;
+import com.salon.booking.dto.AppointmentServiceResponse;
 import com.salon.booking.model.Appointment;
 import com.salon.booking.model.Service;
 import com.salon.booking.repository.AppointmentRepository;

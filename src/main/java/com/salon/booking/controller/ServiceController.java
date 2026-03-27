@@ -1,5 +1,7 @@
 package com.salon.booking.controller;
 
+import com.salon.booking.dto.CreateServiceRequest;
+import com.salon.booking.dto.ServiceResponse;
 import com.salon.booking.model.Service;
 import com.salon.booking.repository.ServiceRepository;
 import jakarta.validation.Valid;

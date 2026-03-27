@@ -1,4 +1,4 @@
-package com.salon.booking.controller;
+package com.salon.booking.dto;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;

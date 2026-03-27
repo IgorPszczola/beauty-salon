@@ -1,4 +1,4 @@
-package com.salon.booking.controller;
+package com.salon.booking.dto;
 
 public record ServiceResponse(
         Long id,
