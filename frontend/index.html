@@ -64,6 +64,8 @@
         </div>
     </div>
 
+    <div id="authMessage" style="margin-top: 8px; color: #6c757d; font-size: 14px;"></div>
+
     <button class="refresh-btn" onclick="loadData()">Odśwież dane</button>
 
     <h2>Dostępne Usługi</h2>
@@ -86,7 +88,7 @@
     <table id="servicesTable">
         <thead>
             <tr>
-                <th>ID</th><th>Nazwa</th><th>Cena</th><th>Czas (min)</th><th>Akcje</th>
+                <th>ID</th><th>Nazwa</th><th>Cena</th><th>Czas (min)</th><th id="serviceActionsHeader">Akcje</th>
             </tr>
         </thead>
         <tbody></tbody>
@@ -137,7 +139,7 @@
     <table id="appointmentsTable">
         <thead>
             <tr>
-                <th>Klient</th><th>Data</th><th>Usługa</th><th>Status</th><th>Akcje</th>
+                <th>Klient</th><th>Data</th><th>Usługa</th><th>Status</th><th id="appointmentActionsHeader">Akcje</th>
             </tr>
         </thead>
         <tbody></tbody>
@@ -179,7 +181,58 @@
         };
     }
 
-    function login() {
+    function getCurrentRole() {
+        return localStorage.getItem('role');
+    }
+
+    function canModifyData() {
+        const role = getCurrentRole();
+        return role === 'ADMIN' || role === 'OWNER' || role === 'STAFF';
+    }
+
+    function updatePermissionUI() {
+        const canWrite = canModifyData();
+        const role = getCurrentRole();
+
+        document.querySelector('#addServiceForm').style.display = canWrite ? 'flex' : 'none';
+        document.querySelector('#addAppointmentForm').style.display = canWrite ? 'flex' : 'none';
+        document.querySelector('#serviceActionsHeader').style.display = canWrite ? 'table-cell' : 'none';
+        document.querySelector('#appointmentActionsHeader').style.display = canWrite ? 'table-cell' : 'none';
+
+        const authMessage = document.querySelector('#authMessage');
+        if (!role) {
+            authMessage.textContent = 'Tryb publiczny: przeglądanie bez logowania.';
+            return;
+        }
+
+        if (!canWrite) {
+            authMessage.textContent = `Rola ${role}: tylko podgląd (bez dodawania, edycji i usuwania).`;
+            return;
+        }
+
+        authMessage.textContent = `Rola ${role}: pełna edycja danych.`;
+    }
+
+    async function fetchCurrentUser(credentials) {
+        let response;
+        try {
+            response = await fetch('http://localhost:8081/api/auth/me', {
+                headers: {
+                    'Authorization': 'Basic ' + credentials
+                }
+            });
+        } catch (error) {
+            return null;
+        }
+
+        if (!response.ok) {
+            return null;
+        }
+
+        return response.json();
+    }
+
+    async function login() {
         const username = document.querySelector('#username').value;
         const password = document.querySelector('#password').value;
 
@@ -189,19 +242,28 @@
         }
 
         const credentials = btoa(username + ':' + password);
+        const me = await fetchCurrentUser(credentials);
+        if (!me) {
+            alert('Nie udało się zalogować. Sprawdź login/hasło lub połączenie z API.');
+            return;
+        }
+
         localStorage.setItem('auth_credentials', credentials);
-        localStorage.setItem('username', username);
+        localStorage.setItem('username', me.username);
+        localStorage.setItem('role', me.role);
 
         document.querySelector('#userInfo').style.display = 'block';
-        document.querySelector('#currentUser').textContent = username;
+        document.querySelector('#currentUser').textContent = `${me.username} (${me.role})`;
         document.querySelector('#authSection').style.display = 'flex';
 
-        loadData();
+        updatePermissionUI();
+        await loadData();
     }
 
     function logout() {
         localStorage.removeItem('auth_credentials');
         localStorage.removeItem('username');
+        localStorage.removeItem('role');
 
         document.querySelector('#userInfo').style.display = 'none';
         document.querySelector('#username').value = '';
@@ -209,15 +271,43 @@
 
         document.querySelector('#servicesTable tbody').innerHTML = '';
         document.querySelector('#appointmentsTable tbody').innerHTML = '';
+        updatePermissionUI();
+        loadData();
     }
 
-    function checkAuthStatus() {
+    async function checkAuthStatus() {
         const username = localStorage.getItem('username');
-        if (username) {
+        const credentials = localStorage.getItem('auth_credentials');
+        if (username && credentials) {
+            const me = await fetchCurrentUser(credentials);
+            if (!me) {
+                logout();
+                return;
+            }
+
+            localStorage.setItem('username', me.username);
+            localStorage.setItem('role', me.role);
             document.querySelector('#userInfo').style.display = 'block';
-            document.querySelector('#currentUser').textContent = username;
-            loadData();
+            document.querySelector('#currentUser').textContent = `${me.username} (${me.role})`;
         }
+
+        updatePermissionUI();
+        await loadData();
+    }
+
+    async function handleAuthResponse(response) {
+        if (response.status === 401) {
+            alert('Sesja wygasła lub dane logowania są niepoprawne. Zaloguj się ponownie.');
+            logout();
+            return true;
+        }
+
+        if (response.status === 403) {
+            alert('Brak uprawnień do tej operacji.');
+            return true;
+        }
+
+        return false;
     }
 
     // ===== Utility Functions =====
@@ -265,6 +355,8 @@
 
     // ===== Load Data =====
     async function loadData() {
+        const canWrite = canModifyData();
+
         // Get Services
         const resServices = await fetch('http://localhost:8081/api/services');
         const services = await resServices.json();
@@ -278,11 +370,7 @@
                 <td>${s.name}</td>
                 <td>${s.price} zł</td>
                 <td>${s.duration}</td>
-                <td>
-                    <button type="button" class="edit-service-btn" data-id="${s.id}" data-name="${s.name}" data-price="${s.price}" data-duration="${s.duration}" style="background: #ffc107; color: black; border: none; padding: 5px 10px; cursor: pointer; border-radius: 3px;">
-                        Edytuj
-                    </button>
-                </td>
+                <td>${canWrite ? `<button type="button" class="edit-service-btn" data-id="${s.id}" data-name="${s.name}" data-price="${s.price}" data-duration="${s.duration}" style="background: #ffc107; color: black; border: none; padding: 5px 10px; cursor: pointer; border-radius: 3px;">Edytuj</button>` : ''}</td>
             </tr>
         `).join('');
         
@@ -303,14 +391,7 @@
                 <td>${new Date(a.appointmentTime).toLocaleString()}</td>
                 <td>${a.service ? a.service.name : 'Brak'}</td>
                 <td>${a.status}</td>
-                <td>
-                    <button type="button" class="edit-appointment-btn" data-id="${a.id}" data-client="${a.clientName}" data-time="${a.appointmentTime}" data-service="${a.service?.id || ''}" data-status="${a.status}" style="background: #ffc107; color: black; border: none; padding: 5px 10px; cursor: pointer; border-radius: 3px; margin-right: 5px;">
-                        Edytuj
-                    </button>
-                    <button type="button" class="delete-btn" data-id="${a.id}" style="background: #dc3545; color: white; border: none; padding: 5px 10px; cursor: pointer; border-radius: 3px;">
-                        Usuń
-                    </button>
-                </td>
+                <td>${canWrite ? `<button type="button" class="edit-appointment-btn" data-id="${a.id}" data-client="${a.clientName}" data-time="${a.appointmentTime}" data-service="${a.service?.id || ''}" data-status="${a.status}" style="background: #ffc107; color: black; border: none; padding: 5px 10px; cursor: pointer; border-radius: 3px; margin-right: 5px;">Edytuj</button><button type="button" class="delete-btn" data-id="${a.id}" style="background: #dc3545; color: white; border: none; padding: 5px 10px; cursor: pointer; border-radius: 3px;">Usuń</button>` : ''}</td>
             </tr>
         `).join('');
     }
@@ -327,6 +408,11 @@
     // ===== Add Service Form =====
     document.querySelector('#addServiceForm').addEventListener('submit', async (event) => {
         event.preventDefault();
+
+        if (!canModifyData()) {
+            alert('Brak uprawnień do dodawania usług.');
+            return;
+        }
 
         const serviceErrorMapping = {
             name: { errorId: 'serviceNameError', inputSelector: '#serviceName' },
@@ -365,8 +451,7 @@
                 showFieldErrors(errorBody.errors, serviceErrorMapping);
                 return;
             }
-            if (response.status === 401) {
-                alert('Brak autoryzacji. Zaloguj się.');
+            if (await handleAuthResponse(response)) {
                 return;
             }
 
@@ -382,6 +467,11 @@
     document.querySelector('#servicesTable tbody').addEventListener('click', async (event) => {
         const editBtn = event.target.closest('.edit-service-btn');
         if (!editBtn) {
+            return;
+        }
+
+        if (!canModifyData()) {
+            alert('Brak uprawnień do edycji usług.');
             return;
         }
 
@@ -401,6 +491,11 @@
     // ===== Edit Service Form =====
     document.querySelector('#editServiceForm').addEventListener('submit', async (event) => {
         event.preventDefault();
+
+        if (!canModifyData()) {
+            alert('Brak uprawnień do edycji usług.');
+            return;
+        }
 
         const serviceErrorMapping = {
             name: { errorId: 'editServiceNameError', inputSelector: '#editServiceName' },
@@ -440,8 +535,7 @@
                 showFieldErrors(errorBody.errors, serviceErrorMapping);
                 return;
             }
-            if (response.status === 401) {
-                alert('Brak autoryzacji. Zaloguj się.');
+            if (await handleAuthResponse(response)) {
                 return;
             }
 
@@ -456,6 +550,11 @@
     // ===== Add Appointment Form =====
     document.querySelector('#addAppointmentForm').addEventListener('submit', async (event) => {
         event.preventDefault();
+
+        if (!canModifyData()) {
+            alert('Brak uprawnień do dodawania wizyt.');
+            return;
+        }
 
         const appointmentErrorMapping = {
             clientName: { errorId: 'clientNameError', inputSelector: '#clientName' },
@@ -496,8 +595,7 @@
                 showFieldErrors(errorBody.errors, appointmentErrorMapping);
                 return;
             }
-            if (response.status === 401) {
-                alert('Brak autoryzacji. Zaloguj się.');
+            if (await handleAuthResponse(response)) {
                 return;
             }
 
@@ -514,6 +612,11 @@
     document.querySelector('#appointmentsTable tbody').addEventListener('click', async (event) => {
         const editBtn = event.target.closest('.edit-appointment-btn');
         if (!editBtn) {
+            return;
+        }
+
+        if (!canModifyData()) {
+            alert('Brak uprawnień do edycji wizyt.');
             return;
         }
 
@@ -535,6 +638,11 @@
     // ===== Edit Appointment Form =====
     document.querySelector('#editAppointmentForm').addEventListener('submit', async (event) => {
         event.preventDefault();
+
+        if (!canModifyData()) {
+            alert('Brak uprawnień do edycji wizyt.');
+            return;
+        }
 
         const appointmentErrorMapping = {
             clientName: { errorId: 'editClientNameError', inputSelector: '#editClientName' },
@@ -576,8 +684,7 @@
                 showFieldErrors(errorBody.errors, appointmentErrorMapping);
                 return;
             }
-            if (response.status === 401) {
-                alert('Brak autoryzacji. Zaloguj się.');
+            if (await handleAuthResponse(response)) {
                 return;
             }
 
@@ -593,6 +700,11 @@
     document.querySelector('#appointmentsTable tbody').addEventListener('click', async (event) => {
         const deleteBtn = event.target.closest('.delete-btn');
         if (!deleteBtn) {
+            return;
+        }
+
+        if (!canModifyData()) {
+            alert('Brak uprawnień do usuwania wizyt.');
             return;
         }
 
@@ -612,8 +724,7 @@
         });
 
         if (!response.ok) {
-            if (response.status === 401) {
-                alert('Brak autoryzacji. Zaloguj się.');
+            if (await handleAuthResponse(response)) {
                 return;
             }
             alert('Nie udało się usunąć wizyty.');
