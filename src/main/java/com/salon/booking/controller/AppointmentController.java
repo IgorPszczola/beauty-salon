@@ -1,6 +1,7 @@
 package com.salon.booking.controller;
 
 import com.salon.booking.dto.CreateAppointmentRequest;
+import com.salon.booking.dto.UpdateAppointmentRequest;
 import com.salon.booking.dto.AppointmentResponse;
 import com.salon.booking.dto.AppointmentServiceResponse;
 import com.salon.booking.model.Appointment;
@@ -47,6 +48,23 @@ public class AppointmentController {
 
         Appointment savedAppointment = appointmentRepository.save(appointment);
         return toAppointmentResponse(savedAppointment);
+    }
+
+    @PatchMapping("/{id}")
+    public ResponseEntity<AppointmentResponse> updateAppointment(@PathVariable Long id, @Valid @RequestBody UpdateAppointmentRequest request){
+        Appointment appointment = appointmentRepository.findById(id)
+                .orElseThrow(() -> new FieldValidationException("id", "Appointment not found"));
+
+        Service service = serviceRepository.findById(request.getServiceId())
+                .orElseThrow(() -> new FieldValidationException("serviceId", "Selected service does not exist"));
+
+        appointment.setClientName(request.getClientName());
+        appointment.setAppointmentTime(request.getAppointmentTime());
+        appointment.setStatus(request.getStatus());
+        appointment.setService(service);
+
+        Appointment updatedAppointment = appointmentRepository.save(appointment);
+        return ResponseEntity.ok(toAppointmentResponse(updatedAppointment));
     }
 
     @DeleteMapping("/delete/{id}")
