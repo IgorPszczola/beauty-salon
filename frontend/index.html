@@ -31,6 +31,17 @@
             outline: none;
             box-shadow: 0 0 0 2px rgba(220, 53, 69, 0.35);
         }
+        .edit-btn { background: #ffc107; color: black; border: none; padding: 5px 10px; cursor: pointer; border-radius: 3px; }
+        .delete-btn { background: #dc3545; color: white; border: none; padding: 5px 10px; cursor: pointer; border-radius: 3px; }
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; }
+        .modal.show { display: flex; align-items: center; justify-content: center; }
+        .modal-content { background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); width: 90%; max-width: 500px; }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .modal-header h2 { margin: 0; }
+        .modal-close { background: none; border: none; font-size: 24px; cursor: pointer; }
+        .edit-form { display: flex; flex-direction: column; gap: 12px; }
+        .edit-form input, .edit-form select { padding: 8px; border: 1px solid #ccc; border-radius: 5px; }
+        .edit-form button { background: #0d6efd; color: white; border: none; padding: 10px; cursor: pointer; border-radius: 5px; }
     </style>
 </head>
 <body>
@@ -59,11 +70,30 @@
     <table id="servicesTable">
         <thead>
             <tr>
-                <th>ID</th><th>Nazwa</th><th>Cena</th><th>Czas (min)</th>
+                <th>ID</th><th>Nazwa</th><th>Cena</th><th>Czas (min)</th><th>Akcje</th>
             </tr>
         </thead>
         <tbody></tbody>
     </table>
+
+    <div id="editServiceModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Edytuj usługę</h2>
+                <button class="modal-close" onclick="closeEditServiceModal()">&times;</button>
+            </div>
+            <form id="editServiceForm" class="edit-form">
+                <input type="hidden" id="editServiceId">
+                <input type="text" id="editServiceName" placeholder="Nazwa usługi" required>
+                <small id="editServiceNameError" class="field-error"></small>
+                <input type="number" id="editServicePrice" placeholder="Cena" min="0" step="0.01" required>
+                <small id="editServicePriceError" class="field-error"></small>
+                <input type="number" id="editServiceDuration" placeholder="Czas (min)" min="1" step="1" required>
+                <small id="editServiceDurationError" class="field-error"></small>
+                <button type="submit">Zaktualizuj</button>
+            </form>
+        </div>
+    </div>
 
     <h2>Zaplanowane Wizyty</h2>
     <form id="addAppointmentForm" class="appointment-form">
@@ -96,6 +126,29 @@
         </thead>
         <tbody></tbody>
     </table>
+
+    <div id="editAppointmentModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Edytuj wizytę</h2>
+                <button class="modal-close" onclick="closeEditAppointmentModal()">&times;</button>
+            </div>
+            <form id="editAppointmentForm" class="edit-form">
+                <input type="hidden" id="editAppointmentId">
+                <input type="text" id="editClientName" placeholder="Imię klienta" required>
+                <small id="editClientNameError" class="field-error"></small>
+                <input type="datetime-local" id="editAppointmentTime" required>
+                <small id="editAppointmentTimeError" class="field-error"></small>
+                <select id="editAppointmentService" required>
+                    <option value="">Wybierz usługę</option>
+                </select>
+                <small id="editAppointmentServiceError" class="field-error"></small>
+                <input type="text" id="editAppointmentStatus" placeholder="Status" required>
+                <small id="editAppointmentStatusError" class="field-error"></small>
+                <button type="submit">Zaktualizuj</button>
+            </form>
+        </div>
+    </div>
 </div>
 
 <script>
@@ -147,13 +200,26 @@
         const services = await resServices.json();
         const sBody = document.querySelector('#servicesTable tbody');
         const serviceSelect = document.querySelector('#appointmentService');
+        const editServiceSelect = document.querySelector('#editAppointmentService');
         sBody.innerHTML = services.map(s => `
-            <tr><td>${s.id}</td><td>${s.name}</td><td>${s.price} zł</td><td>${s.duration}</td></tr>
+            <tr>
+                <td>${s.id}</td>
+                <td>${s.name}</td>
+                <td>${s.price} zł</td>
+                <td>${s.duration}</td>
+                <td>
+                    <button type="button" class="edit-service-btn" data-id="${s.id}" data-name="${s.name}" data-price="${s.price}" data-duration="${s.duration}" style="background: #ffc107; color: black; border: none; padding: 5px 10px; cursor: pointer; border-radius: 3px;">
+                        Edytuj
+                    </button>
+                </td>
+            </tr>
         `).join('');
-        serviceSelect.innerHTML = `
+        const servicesOptions = `
             <option value="">Wybierz usługę</option>
             ${services.map(s => `<option value="${s.id}">${s.name} (${s.duration} min)</option>`).join('')}
         `;
+        serviceSelect.innerHTML = servicesOptions;
+        editServiceSelect.innerHTML = servicesOptions;
 
         // Pobieranie Wizyt
         const resApps = await fetch('http://localhost:8081/api/appointments');
@@ -166,6 +232,9 @@
             <td>${a.service ? a.service.name : 'Brak'}</td>
             <td>${a.status}</td>
             <td>
+                <button type="button" class="edit-appointment-btn" data-id="${a.id}" data-client="${a.clientName}" data-time="${a.appointmentTime}" data-service="${a.service?.id || ''}" data-status="${a.status}" style="background: #ffc107; color: black; border: none; padding: 5px 10px; cursor: pointer; border-radius: 3px; margin-right: 5px;">
+                    Edytuj
+                </button>
                 <button type="button" class="delete-btn" data-id="${a.id}" style="background: #dc3545; color: white; border: none; padding: 5px 10px; cursor: pointer; border-radius: 3px;">
                     Usuń
                 </button>
@@ -177,34 +246,63 @@
     // Ładuj dane na starcie
     loadData();
 
-    document.querySelector('#addServiceForm').addEventListener('submit', async (event) => {
+    function closeEditServiceModal() {
+        document.querySelector('#editServiceModal').classList.remove('show');
+    }
+
+    function closeEditAppointmentModal() {
+        document.querySelector('#editAppointmentModal').classList.remove('show');
+    }
+
+    document.querySelector('#servicesTable tbody').addEventListener('click', async (event) => {
+        const editBtn = event.target.closest('.edit-service-btn');
+        if (!editBtn) {
+            return;
+        }
+
+        const id = editBtn.dataset.id;
+        const name = editBtn.dataset.name;
+        const price = editBtn.dataset.price;
+        const duration = editBtn.dataset.duration;
+
+        document.querySelector('#editServiceId').value = id;
+        document.querySelector('#editServiceName').value = name;
+        document.querySelector('#editServicePrice').value = price;
+        document.querySelector('#editServiceDuration').value = duration;
+
+        document.querySelector('#editServiceModal').classList.add('show');
+    });
+
+    document.querySelector('#editServiceForm').addEventListener('submit', async (event) => {
         event.preventDefault();
 
         const serviceErrorMapping = {
-            name: { errorId: 'serviceNameError', inputSelector: '#serviceName' },
-            price: { errorId: 'servicePriceError', inputSelector: '#servicePrice' },
-            duration: { errorId: 'serviceDurationError', inputSelector: '#serviceDuration' }
+            name: { errorId: 'editServiceNameError', inputSelector: '#editServiceName' },
+            price: { errorId: 'editServicePriceError', inputSelector: '#editServicePrice' },
+            duration: { errorId: 'editServiceDurationError', inputSelector: '#editServiceDuration' }
         };
         clearFieldErrors(serviceErrorMapping);
 
-        const name = document.querySelector('#serviceName').value.trim();
-        const price = Number(document.querySelector('#servicePrice').value);
-        const duration = Number(document.querySelector('#serviceDuration').value);
+        const id = document.querySelector('#editServiceId').value;
+        const name = document.querySelector('#editServiceName').value.trim();
+        const price = Number(document.querySelector('#editServicePrice').value);
+        const duration = Number(document.querySelector('#editServiceDuration').value);
 
         if (!name || Number.isNaN(price) || Number.isNaN(duration)) {
             alert('Uzupełnij poprawnie wszystkie pola usługi.');
             return;
         }
 
-        const response = await fetch('http://localhost:8081/api/services', {
-            method: 'POST',
+        const response = await fetch(`http://localhost:8081/api/services/${id}`, {
+            method: 'PATCH',
             headers: {
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({
                 name,
                 price,
-                duration
+                duration,
+                description: ''
             })
         });
 
@@ -215,15 +313,87 @@
                 return;
             }
 
-            alert('Nie udało się dodać usługi.');
+            alert('Nie udało się zaktualizować usługi.');
             return;
         }
 
-        event.target.reset();
+        closeEditServiceModal();
         loadData();
     });
 
-    document.querySelector('#addAppointmentForm').addEventListener('submit', async (event) => {
+    document.querySelector('#appointmentsTable tbody').addEventListener('click', async (event) => {
+        const editBtn = event.target.closest('.edit-appointment-btn');
+        if (!editBtn) {
+            return;
+        }
+
+        const id = editBtn.dataset.id;
+        const clientName = editBtn.dataset.client;
+        const appointmentTime = editBtn.dataset.time;
+        const serviceId = editBtn.dataset.service;
+        const status = editBtn.dataset.status;
+
+        document.querySelector('#editAppointmentId').value = id;
+        document.querySelector('#editClientName').value = clientName;
+        document.querySelector('#editAppointmentTime').value = appointmentTime;
+        document.querySelector('#editAppointmentService').value = serviceId;
+        document.querySelector('#editAppointmentStatus').value = status;
+
+        document.querySelector('#editAppointmentModal').classList.add('show');
+    });
+
+    document.querySelector('#editAppointmentForm').addEventListener('submit', async (event) => {
+        event.preventDefault();
+
+        const appointmentErrorMapping = {
+            clientName: { errorId: 'editClientNameError', inputSelector: '#editClientName' },
+            appointmentTime: { errorId: 'editAppointmentTimeError', inputSelector: '#editAppointmentTime' },
+            serviceId: { errorId: 'editAppointmentServiceError', inputSelector: '#editAppointmentService' },
+            status: { errorId: 'editAppointmentStatusError', inputSelector: '#editAppointmentStatus' }
+        };
+        clearFieldErrors(appointmentErrorMapping);
+
+        const id = document.querySelector('#editAppointmentId').value;
+        const clientName = document.querySelector('#editClientName').value.trim();
+        const appointmentTime = document.querySelector('#editAppointmentTime').value;
+        const serviceId = Number(document.querySelector('#editAppointmentService').value);
+        const status = document.querySelector('#editAppointmentStatus').value.trim();
+
+        if (!clientName || !appointmentTime || Number.isNaN(serviceId) || !status) {
+            alert('Uzupełnij poprawnie wszystkie pola wizyty.');
+            return;
+        }
+
+        const response = await fetch(`http://localhost:8081/api/appointments/${id}`, {
+            method: 'PATCH',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                clientName,
+                appointmentTime,
+                status,
+                serviceId
+            })
+        });
+
+        if (!response.ok) {
+            const errorBody = await parseErrorResponse(response);
+            if (response.status === 400 && errorBody && errorBody.errors) {
+                showFieldErrors(errorBody.errors, appointmentErrorMapping);
+                return;
+            }
+
+            alert('Nie udało się zaktualizować wizyty.');
+            return;
+        }
+
+        closeEditAppointmentModal();
+        loadData();
+    });
+
+
+    document.querySelector('#addServiceForm').addEventListener('submit', async (event) => {
         event.preventDefault();
 
         const appointmentErrorMapping = {
@@ -303,6 +473,159 @@
 
         loadData();
     }
+
+    document.querySelector('#editServiceForm').addEventListener('submit', async (event) => {
+        event.preventDefault();
+
+        const serviceErrorMapping = {
+            name: { errorId: 'editServiceNameError', inputSelector: '#editServiceName' },
+            price: { errorId: 'editServicePriceError', inputSelector: '#editServicePrice' },
+            duration: { errorId: 'editServiceDurationError', inputSelector: '#editServiceDuration' }
+        };
+        clearFieldErrors(serviceErrorMapping);
+
+        const id = document.querySelector('#editServiceId').value;
+        const name = document.querySelector('#editServiceName').value.trim();
+        const price = Number(document.querySelector('#editServicePrice').value);
+        const duration = Number(document.querySelector('#editServiceDuration').value);
+
+        if (!name || Number.isNaN(price) || Number.isNaN(duration)) {
+            alert('Uzupełnij poprawnie wszystkie pola usługi.');
+            return;
+        }
+
+        const response = await fetch(`http://localhost:8081/api/services/${id}`, {
+            method: 'PATCH',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                name,
+                price,
+                duration,
+                description: ''
+            })
+        });
+
+        if (!response.ok) {
+            const errorBody = await parseErrorResponse(response);
+            if (response.status === 400 && errorBody && errorBody.errors) {
+                showFieldErrors(errorBody.errors, serviceErrorMapping);
+                return;
+            }
+
+            alert('Nie udało się zaktualizować usługi.');
+            return;
+        }
+
+        closeEditServiceModal();
+        loadData();
+    });
+
+    document.querySelector('#editAppointmentForm').addEventListener('submit', async (event) => {
+        event.preventDefault();
+
+        const appointmentErrorMapping = {
+            clientName: { errorId: 'editClientNameError', inputSelector: '#editClientName' },
+            appointmentTime: { errorId: 'editAppointmentTimeError', inputSelector: '#editAppointmentTime' },
+            serviceId: { errorId: 'editAppointmentServiceError', inputSelector: '#editAppointmentService' },
+            status: { errorId: 'editAppointmentStatusError', inputSelector: '#editAppointmentStatus' }
+        };
+        clearFieldErrors(appointmentErrorMapping);
+
+        const id = document.querySelector('#editAppointmentId').value;
+        const clientName = document.querySelector('#editClientName').value.trim();
+        const appointmentTime = document.querySelector('#editAppointmentTime').value;
+        const serviceId = Number(document.querySelector('#editAppointmentService').value);
+        const status = document.querySelector('#editAppointmentStatus').value.trim();
+
+        if (!clientName || !appointmentTime || Number.isNaN(serviceId) || !status) {
+            alert('Uzupełnij poprawnie wszystkie pola wizyty.');
+            return;
+        }
+
+        const response = await fetch(`http://localhost:8081/api/appointments/${id}`, {
+            method: 'PATCH',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                clientName,
+                appointmentTime,
+                status,
+                serviceId
+            })
+        });
+
+        if (!response.ok) {
+            const errorBody = await parseErrorResponse(response);
+            if (response.status === 400 && errorBody && errorBody.errors) {
+                showFieldErrors(errorBody.errors, appointmentErrorMapping);
+                return;
+            }
+
+            alert('Nie udało się zaktualizować wizyty.');
+            return;
+        }
+
+        closeEditAppointmentModal();
+        loadData();
+    });
+
+    document.querySelector('#servicesTable tbody').addEventListener('click', async (event) => {
+        const editBtn = event.target.closest('.edit-service-btn');
+        if (editBtn) {
+            const id = editBtn.dataset.id;
+            const name = editBtn.dataset.name;
+            const price = editBtn.dataset.price;
+            const duration = editBtn.dataset.duration;
+
+            document.querySelector('#editServiceId').value = id;
+            document.querySelector('#editServiceName').value = name;
+            document.querySelector('#editServicePrice').value = price;
+            document.querySelector('#editServiceDuration').value = duration;
+
+            document.querySelector('#editServiceModal').classList.add('show');
+            return;
+        }
+    });
+
+    document.querySelector('#appointmentsTable tbody').addEventListener('click', async (event) => {
+        const editBtn = event.target.closest('.edit-appointment-btn');
+        if (editBtn) {
+            const id = editBtn.dataset.id;
+            const clientName = editBtn.dataset.client;
+            const appointmentTime = editBtn.dataset.time;
+            const serviceId = editBtn.dataset.service;
+            const status = editBtn.dataset.status;
+
+            document.querySelector('#editAppointmentId').value = id;
+            document.querySelector('#editClientName').value = clientName;
+            document.querySelector('#editAppointmentTime').value = appointmentTime;
+            document.querySelector('#editAppointmentService').value = serviceId;
+            document.querySelector('#editAppointmentStatus').value = status;
+
+            document.querySelector('#editAppointmentModal').classList.add('show');
+            return;
+        }
+
+        const deleteBtn = event.target.closest('.delete-btn');
+        if (deleteBtn) {
+            const id = deleteBtn.dataset.id;
+            if (id) {
+                await deleteApp(id);
+            }
+        }
+    });
+
+    document.addEventListener('click', (event) => {
+        if (event.target.id === 'editServiceModal' && event.target.classList.contains('modal')) {
+            closeEditServiceModal();
+        }
+        if (event.target.id === 'editAppointmentModal' && event.target.classList.contains('modal')) {
+            closeEditAppointmentModal();
+        }
+    });
 </script>
 
 </body>
