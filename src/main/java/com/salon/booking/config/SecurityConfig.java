@@ -32,13 +32,25 @@ public class SecurityConfig {
                 .roles("ADMIN")
                 .build();
 
+        UserDetails owner = User.builder()
+            .username("owner")
+            .password(passwordEncoder().encode("owner123"))
+            .roles("OWNER")
+            .build();
+
         UserDetails staff = User.builder()
                 .username("staff")
                 .password(passwordEncoder().encode("staff123"))
                 .roles("STAFF")
                 .build();
 
-        return new InMemoryUserDetailsManager(admin, staff);
+        UserDetails customer = User.builder()
+            .username("customer")
+            .password(passwordEncoder().encode("customer123"))
+            .roles("CUSTOMER")
+            .build();
+
+        return new InMemoryUserDetailsManager(admin, owner, staff, customer);
     }
 
     @Bean
@@ -48,9 +60,9 @@ public class SecurityConfig {
                 .cors(Customizer.withDefaults())
                 .authorizeHttpRequests(auth -> auth
                     .requestMatchers(HttpMethod.GET, "/api/services", "/api/appointments").permitAll()
-                    .requestMatchers(HttpMethod.POST, "/api/services", "/api/appointments").authenticated()
-                    .requestMatchers(HttpMethod.PATCH, "/api/services/**", "/api/appointments/**").authenticated()
-                    .requestMatchers(HttpMethod.DELETE, "/api/appointments/**").authenticated()
+                    .requestMatchers(HttpMethod.POST, "/api/services", "/api/appointments").hasAnyRole("ADMIN", "OWNER", "STAFF")
+                    .requestMatchers(HttpMethod.PATCH, "/api/services/**", "/api/appointments/**").hasAnyRole("ADMIN", "OWNER", "STAFF")
+                    .requestMatchers(HttpMethod.DELETE, "/api/appointments/**").hasAnyRole("ADMIN", "OWNER", "STAFF")
                     .anyRequest().permitAll()
                 )
                 .httpBasic(Customizer.withDefaults())
