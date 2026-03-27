@@ -42,12 +42,28 @@
         .edit-form { display: flex; flex-direction: column; gap: 12px; }
         .edit-form input, .edit-form select { padding: 8px; border: 1px solid #ccc; border-radius: 5px; }
         .edit-form button { background: #0d6efd; color: white; border: none; padding: 10px; cursor: pointer; border-radius: 5px; }
+        .login-form { display: flex; gap: 10px; flex-wrap: wrap; align-items: flex-end; }
+        .login-form input { padding: 8px; border: 1px solid #ccc; border-radius: 5px; }
+        .login-form button { background: #6c757d; color: white; border: none; padding: 8px 14px; cursor: pointer; border-radius: 5px; }
+        .login-form .user-info { margin-left: auto; font-size: 14px; }
+        .logout-btn { background: #dc3545; color: white; border: none; padding: 5px 10px; cursor: pointer; border-radius: 3px; }
     </style>
 </head>
 <body>
 
 <div class="container">
     <h1>💅 System Rezerwacji Salonu</h1>
+    
+    <div class="login-form" id="authSection">
+        <input type="text" id="username" placeholder="Nazwa użytkownika" value="admin">
+        <input type="password" id="password" placeholder="Hasło" value="admin123">
+        <button onclick="login()">Zaloguj</button>
+        <div class="user-info" id="userInfo" style="display: none;">
+            Zalogowany jako: <strong id="currentUser"></strong>
+            <button class="logout-btn" onclick="logout()">Wyloguj</button>
+        </div>
+    </div>
+
     <button class="refresh-btn" onclick="loadData()">Odśwież dane</button>
 
     <h2>Dostępne Usługi</h2>
@@ -152,6 +168,59 @@
 </div>
 
 <script>
+    // ===== Authentication Functions =====
+    function getAuthHeader() {
+        const credentials = localStorage.getItem('auth_credentials');
+        if (!credentials) {
+            return {};
+        }
+        return {
+            'Authorization': 'Basic ' + credentials
+        };
+    }
+
+    function login() {
+        const username = document.querySelector('#username').value;
+        const password = document.querySelector('#password').value;
+
+        if (!username || !password) {
+            alert('Wpisz nazwę użytkownika i hasło.');
+            return;
+        }
+
+        const credentials = btoa(username + ':' + password);
+        localStorage.setItem('auth_credentials', credentials);
+        localStorage.setItem('username', username);
+
+        document.querySelector('#userInfo').style.display = 'block';
+        document.querySelector('#currentUser').textContent = username;
+        document.querySelector('#authSection').style.display = 'flex';
+
+        loadData();
+    }
+
+    function logout() {
+        localStorage.removeItem('auth_credentials');
+        localStorage.removeItem('username');
+
+        document.querySelector('#userInfo').style.display = 'none';
+        document.querySelector('#username').value = '';
+        document.querySelector('#password').value = '';
+
+        document.querySelector('#servicesTable tbody').innerHTML = '';
+        document.querySelector('#appointmentsTable tbody').innerHTML = '';
+    }
+
+    function checkAuthStatus() {
+        const username = localStorage.getItem('username');
+        if (username) {
+            document.querySelector('#userInfo').style.display = 'block';
+            document.querySelector('#currentUser').textContent = username;
+            loadData();
+        }
+    }
+
+    // ===== Utility Functions =====
     function clearFieldErrors(mapping) {
         Object.entries(mapping).forEach(([fieldName, config]) => {
             const errorId = config.errorId;
@@ -194,13 +263,15 @@
         return response.json().catch(() => null);
     }
 
+    // ===== Load Data =====
     async function loadData() {
-        // Pobieranie Usług
+        // Get Services
         const resServices = await fetch('http://localhost:8081/api/services');
         const services = await resServices.json();
         const sBody = document.querySelector('#servicesTable tbody');
         const serviceSelect = document.querySelector('#appointmentService');
         const editServiceSelect = document.querySelector('#editAppointmentService');
+        
         sBody.innerHTML = services.map(s => `
             <tr>
                 <td>${s.id}</td>
@@ -214,6 +285,7 @@
                 </td>
             </tr>
         `).join('');
+        
         const servicesOptions = `
             <option value="">Wybierz usługę</option>
             ${services.map(s => `<option value="${s.id}">${s.name} (${s.duration} min)</option>`).join('')}
@@ -221,31 +293,29 @@
         serviceSelect.innerHTML = servicesOptions;
         editServiceSelect.innerHTML = servicesOptions;
 
-        // Pobieranie Wizyt
+        // Get Appointments
         const resApps = await fetch('http://localhost:8081/api/appointments');
         const apps = await resApps.json();
         const aBody = document.querySelector('#appointmentsTable tbody');
         aBody.innerHTML = apps.map(a => `
-        <tr>
-            <td>${a.clientName}</td>
-            <td>${new Date(a.appointmentTime).toLocaleString()}</td>
-            <td>${a.service ? a.service.name : 'Brak'}</td>
-            <td>${a.status}</td>
-            <td>
-                <button type="button" class="edit-appointment-btn" data-id="${a.id}" data-client="${a.clientName}" data-time="${a.appointmentTime}" data-service="${a.service?.id || ''}" data-status="${a.status}" style="background: #ffc107; color: black; border: none; padding: 5px 10px; cursor: pointer; border-radius: 3px; margin-right: 5px;">
-                    Edytuj
-                </button>
-                <button type="button" class="delete-btn" data-id="${a.id}" style="background: #dc3545; color: white; border: none; padding: 5px 10px; cursor: pointer; border-radius: 3px;">
-                    Usuń
-                </button>
-            </td>
-        </tr>
+            <tr>
+                <td>${a.clientName}</td>
+                <td>${new Date(a.appointmentTime).toLocaleString()}</td>
+                <td>${a.service ? a.service.name : 'Brak'}</td>
+                <td>${a.status}</td>
+                <td>
+                    <button type="button" class="edit-appointment-btn" data-id="${a.id}" data-client="${a.clientName}" data-time="${a.appointmentTime}" data-service="${a.service?.id || ''}" data-status="${a.status}" style="background: #ffc107; color: black; border: none; padding: 5px 10px; cursor: pointer; border-radius: 3px; margin-right: 5px;">
+                        Edytuj
+                    </button>
+                    <button type="button" class="delete-btn" data-id="${a.id}" style="background: #dc3545; color: white; border: none; padding: 5px 10px; cursor: pointer; border-radius: 3px;">
+                        Usuń
+                    </button>
+                </td>
+            </tr>
         `).join('');
     }
 
-    // Ładuj dane na starcie
-    loadData();
-
+    // ===== Modal Functions =====
     function closeEditServiceModal() {
         document.querySelector('#editServiceModal').classList.remove('show');
     }
@@ -254,6 +324,61 @@
         document.querySelector('#editAppointmentModal').classList.remove('show');
     }
 
+    // ===== Add Service Form =====
+    document.querySelector('#addServiceForm').addEventListener('submit', async (event) => {
+        event.preventDefault();
+
+        const serviceErrorMapping = {
+            name: { errorId: 'serviceNameError', inputSelector: '#serviceName' },
+            price: { errorId: 'servicePriceError', inputSelector: '#servicePrice' },
+            duration: { errorId: 'serviceDurationError', inputSelector: '#serviceDuration' }
+        };
+        clearFieldErrors(serviceErrorMapping);
+
+        const name = document.querySelector('#serviceName').value.trim();
+        const price = Number(document.querySelector('#servicePrice').value);
+        const duration = Number(document.querySelector('#serviceDuration').value);
+
+        if (!name || Number.isNaN(price) || Number.isNaN(duration)) {
+            alert('Uzupełnij poprawnie wszystkie pola usługi.');
+            return;
+        }
+
+        const authHeaders = getAuthHeader();
+        const response = await fetch('http://localhost:8081/api/services', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                ...authHeaders
+            },
+            body: JSON.stringify({
+                name,
+                price,
+                duration,
+                description: ''
+            })
+        });
+
+        if (!response.ok) {
+            const errorBody = await parseErrorResponse(response);
+            if (response.status === 400 && errorBody && errorBody.errors) {
+                showFieldErrors(errorBody.errors, serviceErrorMapping);
+                return;
+            }
+            if (response.status === 401) {
+                alert('Brak autoryzacji. Zaloguj się.');
+                return;
+            }
+
+            alert('Nie udało się dodać usługi.');
+            return;
+        }
+
+        event.target.reset();
+        loadData();
+    });
+
+    // ===== Edit Service Modal =====
     document.querySelector('#servicesTable tbody').addEventListener('click', async (event) => {
         const editBtn = event.target.closest('.edit-service-btn');
         if (!editBtn) {
@@ -273,6 +398,7 @@
         document.querySelector('#editServiceModal').classList.add('show');
     });
 
+    // ===== Edit Service Form =====
     document.querySelector('#editServiceForm').addEventListener('submit', async (event) => {
         event.preventDefault();
 
@@ -293,10 +419,12 @@
             return;
         }
 
+        const authHeaders = getAuthHeader();
         const response = await fetch(`http://localhost:8081/api/services/${id}`, {
             method: 'PATCH',
             headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                ...authHeaders
             },
             body: JSON.stringify({
                 name,
@@ -312,6 +440,10 @@
                 showFieldErrors(errorBody.errors, serviceErrorMapping);
                 return;
             }
+            if (response.status === 401) {
+                alert('Brak autoryzacji. Zaloguj się.');
+                return;
+            }
 
             alert('Nie udało się zaktualizować usługi.');
             return;
@@ -321,6 +453,64 @@
         loadData();
     });
 
+    // ===== Add Appointment Form =====
+    document.querySelector('#addAppointmentForm').addEventListener('submit', async (event) => {
+        event.preventDefault();
+
+        const appointmentErrorMapping = {
+            clientName: { errorId: 'clientNameError', inputSelector: '#clientName' },
+            appointmentTime: { errorId: 'appointmentTimeError', inputSelector: '#appointmentTime' },
+            serviceId: { errorId: 'appointmentServiceError', inputSelector: '#appointmentService' },
+            status: { errorId: 'appointmentStatusError', inputSelector: '#appointmentStatus' }
+        };
+        clearFieldErrors(appointmentErrorMapping);
+
+        const clientName = document.querySelector('#clientName').value.trim();
+        const appointmentTime = document.querySelector('#appointmentTime').value;
+        const serviceId = Number(document.querySelector('#appointmentService').value);
+        const status = document.querySelector('#appointmentStatus').value.trim();
+
+        if (!clientName || !appointmentTime || Number.isNaN(serviceId) || !status) {
+            alert('Uzupełnij poprawnie wszystkie pola wizyty.');
+            return;
+        }
+
+        const authHeaders = getAuthHeader();
+        const response = await fetch('http://localhost:8081/api/appointments', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                ...authHeaders
+            },
+            body: JSON.stringify({
+                clientName,
+                appointmentTime,
+                status,
+                serviceId
+            })
+        });
+
+        if (!response.ok) {
+            const errorBody = await parseErrorResponse(response);
+            if (response.status === 400 && errorBody && errorBody.errors) {
+                showFieldErrors(errorBody.errors, appointmentErrorMapping);
+                return;
+            }
+            if (response.status === 401) {
+                alert('Brak autoryzacji. Zaloguj się.');
+                return;
+            }
+
+            alert('Nie udało się dodać wizyty.');
+            return;
+        }
+
+        event.target.reset();
+        document.querySelector('#appointmentStatus').value = 'NEW';
+        loadData();
+    });
+
+    // ===== Edit Appointment Modal =====
     document.querySelector('#appointmentsTable tbody').addEventListener('click', async (event) => {
         const editBtn = event.target.closest('.edit-appointment-btn');
         if (!editBtn) {
@@ -342,6 +532,7 @@
         document.querySelector('#editAppointmentModal').classList.add('show');
     });
 
+    // ===== Edit Appointment Form =====
     document.querySelector('#editAppointmentForm').addEventListener('submit', async (event) => {
         event.preventDefault();
 
@@ -364,10 +555,12 @@
             return;
         }
 
+        const authHeaders = getAuthHeader();
         const response = await fetch(`http://localhost:8081/api/appointments/${id}`, {
             method: 'PATCH',
             headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                ...authHeaders
             },
             body: JSON.stringify({
                 clientName,
@@ -381,6 +574,10 @@
             const errorBody = await parseErrorResponse(response);
             if (response.status === 400 && errorBody && errorBody.errors) {
                 showFieldErrors(errorBody.errors, appointmentErrorMapping);
+                return;
+            }
+            if (response.status === 401) {
+                alert('Brak autoryzacji. Zaloguj się.');
                 return;
             }
 
@@ -392,232 +589,41 @@
         loadData();
     });
 
-
-    document.querySelector('#addServiceForm').addEventListener('submit', async (event) => {
-        event.preventDefault();
-
-        const appointmentErrorMapping = {
-            clientName: { errorId: 'clientNameError', inputSelector: '#clientName' },
-            appointmentTime: { errorId: 'appointmentTimeError', inputSelector: '#appointmentTime' },
-            serviceId: { errorId: 'appointmentServiceError', inputSelector: '#appointmentService' },
-            status: { errorId: 'appointmentStatusError', inputSelector: '#appointmentStatus' }
-        };
-        clearFieldErrors(appointmentErrorMapping);
-
-        const clientName = document.querySelector('#clientName').value.trim();
-        const appointmentTime = document.querySelector('#appointmentTime').value;
-        const serviceId = Number(document.querySelector('#appointmentService').value);
-        const status = document.querySelector('#appointmentStatus').value.trim();
-
-        if (!clientName || !appointmentTime || Number.isNaN(serviceId) || !status) {
-            alert('Uzupełnij poprawnie wszystkie pola wizyty.');
-            return;
-        }
-
-        const response = await fetch('http://localhost:8081/api/appointments', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                clientName,
-                appointmentTime,
-                status,
-                serviceId
-            })
-        });
-
-        if (!response.ok) {
-            const errorBody = await parseErrorResponse(response);
-            if (response.status === 400 && errorBody && errorBody.errors) {
-                showFieldErrors(errorBody.errors, appointmentErrorMapping);
-                return;
-            }
-
-            alert('Nie udało się dodać wizyty.');
-            return;
-        }
-
-        event.target.reset();
-        document.querySelector('#appointmentStatus').value = 'NEW';
-        loadData();
-    });
-
+    // ===== Delete Appointment =====
     document.querySelector('#appointmentsTable tbody').addEventListener('click', async (event) => {
-        const button = event.target.closest('.delete-btn');
-        if (!button) {
+        const deleteBtn = event.target.closest('.delete-btn');
+        if (!deleteBtn) {
             return;
         }
 
-        const id = button.dataset.id;
+        const id = deleteBtn.dataset.id;
         if (!id) {
             return;
         }
 
-        await deleteApp(id);
-    });
-
-    async function deleteApp(id) {
         if (!confirm('Na pewno chcesz usunąć tę wizytę?')) {
             return;
         }
 
-        const response = await fetch(`http://localhost:8081/api/appointments/delete/${id}`, {
-            method: 'DELETE'
+        const authHeaders = getAuthHeader();
+        const response = await fetch(`http://localhost:8081/api/appointments/${id}`, {
+            method: 'DELETE',
+            headers: authHeaders
         });
 
         if (!response.ok) {
+            if (response.status === 401) {
+                alert('Brak autoryzacji. Zaloguj się.');
+                return;
+            }
             alert('Nie udało się usunąć wizyty.');
             return;
         }
 
         loadData();
-    }
-
-    document.querySelector('#editServiceForm').addEventListener('submit', async (event) => {
-        event.preventDefault();
-
-        const serviceErrorMapping = {
-            name: { errorId: 'editServiceNameError', inputSelector: '#editServiceName' },
-            price: { errorId: 'editServicePriceError', inputSelector: '#editServicePrice' },
-            duration: { errorId: 'editServiceDurationError', inputSelector: '#editServiceDuration' }
-        };
-        clearFieldErrors(serviceErrorMapping);
-
-        const id = document.querySelector('#editServiceId').value;
-        const name = document.querySelector('#editServiceName').value.trim();
-        const price = Number(document.querySelector('#editServicePrice').value);
-        const duration = Number(document.querySelector('#editServiceDuration').value);
-
-        if (!name || Number.isNaN(price) || Number.isNaN(duration)) {
-            alert('Uzupełnij poprawnie wszystkie pola usługi.');
-            return;
-        }
-
-        const response = await fetch(`http://localhost:8081/api/services/${id}`, {
-            method: 'PATCH',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                name,
-                price,
-                duration,
-                description: ''
-            })
-        });
-
-        if (!response.ok) {
-            const errorBody = await parseErrorResponse(response);
-            if (response.status === 400 && errorBody && errorBody.errors) {
-                showFieldErrors(errorBody.errors, serviceErrorMapping);
-                return;
-            }
-
-            alert('Nie udało się zaktualizować usługi.');
-            return;
-        }
-
-        closeEditServiceModal();
-        loadData();
     });
 
-    document.querySelector('#editAppointmentForm').addEventListener('submit', async (event) => {
-        event.preventDefault();
-
-        const appointmentErrorMapping = {
-            clientName: { errorId: 'editClientNameError', inputSelector: '#editClientName' },
-            appointmentTime: { errorId: 'editAppointmentTimeError', inputSelector: '#editAppointmentTime' },
-            serviceId: { errorId: 'editAppointmentServiceError', inputSelector: '#editAppointmentService' },
-            status: { errorId: 'editAppointmentStatusError', inputSelector: '#editAppointmentStatus' }
-        };
-        clearFieldErrors(appointmentErrorMapping);
-
-        const id = document.querySelector('#editAppointmentId').value;
-        const clientName = document.querySelector('#editClientName').value.trim();
-        const appointmentTime = document.querySelector('#editAppointmentTime').value;
-        const serviceId = Number(document.querySelector('#editAppointmentService').value);
-        const status = document.querySelector('#editAppointmentStatus').value.trim();
-
-        if (!clientName || !appointmentTime || Number.isNaN(serviceId) || !status) {
-            alert('Uzupełnij poprawnie wszystkie pola wizyty.');
-            return;
-        }
-
-        const response = await fetch(`http://localhost:8081/api/appointments/${id}`, {
-            method: 'PATCH',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                clientName,
-                appointmentTime,
-                status,
-                serviceId
-            })
-        });
-
-        if (!response.ok) {
-            const errorBody = await parseErrorResponse(response);
-            if (response.status === 400 && errorBody && errorBody.errors) {
-                showFieldErrors(errorBody.errors, appointmentErrorMapping);
-                return;
-            }
-
-            alert('Nie udało się zaktualizować wizyty.');
-            return;
-        }
-
-        closeEditAppointmentModal();
-        loadData();
-    });
-
-    document.querySelector('#servicesTable tbody').addEventListener('click', async (event) => {
-        const editBtn = event.target.closest('.edit-service-btn');
-        if (editBtn) {
-            const id = editBtn.dataset.id;
-            const name = editBtn.dataset.name;
-            const price = editBtn.dataset.price;
-            const duration = editBtn.dataset.duration;
-
-            document.querySelector('#editServiceId').value = id;
-            document.querySelector('#editServiceName').value = name;
-            document.querySelector('#editServicePrice').value = price;
-            document.querySelector('#editServiceDuration').value = duration;
-
-            document.querySelector('#editServiceModal').classList.add('show');
-            return;
-        }
-    });
-
-    document.querySelector('#appointmentsTable tbody').addEventListener('click', async (event) => {
-        const editBtn = event.target.closest('.edit-appointment-btn');
-        if (editBtn) {
-            const id = editBtn.dataset.id;
-            const clientName = editBtn.dataset.client;
-            const appointmentTime = editBtn.dataset.time;
-            const serviceId = editBtn.dataset.service;
-            const status = editBtn.dataset.status;
-
-            document.querySelector('#editAppointmentId').value = id;
-            document.querySelector('#editClientName').value = clientName;
-            document.querySelector('#editAppointmentTime').value = appointmentTime;
-            document.querySelector('#editAppointmentService').value = serviceId;
-            document.querySelector('#editAppointmentStatus').value = status;
-
-            document.querySelector('#editAppointmentModal').classList.add('show');
-            return;
-        }
-
-        const deleteBtn = event.target.closest('.delete-btn');
-        if (deleteBtn) {
-            const id = deleteBtn.dataset.id;
-            if (id) {
-                await deleteApp(id);
-            }
-        }
-    });
-
+    // ===== Modal Close =====
     document.addEventListener('click', (event) => {
         if (event.target.id === 'editServiceModal' && event.target.classList.contains('modal')) {
             closeEditServiceModal();
@@ -626,6 +632,9 @@
             closeEditAppointmentModal();
         }
     });
+
+    // ===== Initialize =====
+    checkAuthStatus();
 </script>
 
 </body>

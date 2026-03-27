@@ -67,7 +67,7 @@ public class AppointmentController {
         return ResponseEntity.ok(toAppointmentResponse(updatedAppointment));
     }
 
-    @DeleteMapping("/delete/{id}")
+    @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteAppointment(@PathVariable Long id){
         if (!appointmentRepository.existsById(id)) {
             return ResponseEntity.notFound().build();
