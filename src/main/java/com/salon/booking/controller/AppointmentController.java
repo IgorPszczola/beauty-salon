@@ -5,6 +5,8 @@ import com.salon.booking.model.Service;
 import com.salon.booking.repository.AppointmentRepository;
 import com.salon.booking.repository.ServiceRepository;
 import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -45,8 +47,12 @@ public class AppointmentController {
     }
 
     @DeleteMapping("/delete/{id}")
-    public void deleteAppointment(@PathVariable Long id){
+    public ResponseEntity<Void> deleteAppointment(@PathVariable Long id){
+        if (!appointmentRepository.existsById(id)) {
+            return ResponseEntity.notFound().build();
+        }
         appointmentRepository.deleteById(id);
+        return ResponseEntity.noContent().build();
     }
 
     private AppointmentResponse toAppointmentResponse(Appointment appointment) {
