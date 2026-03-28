@@ -47,6 +47,13 @@
         .login-form button { background: #6c757d; color: white; border: none; padding: 8px 14px; cursor: pointer; border-radius: 5px; }
         .login-form .user-info { margin-left: auto; font-size: 14px; }
         .logout-btn { background: #dc3545; color: white; border: none; padding: 5px 10px; cursor: pointer; border-radius: 3px; }
+        .users-form { margin-top: 16px; display: flex; gap: 10px; flex-wrap: wrap; }
+        .users-form input, .users-form select { padding: 8px; border: 1px solid #ccc; border-radius: 5px; }
+        .users-form button { background: #198754; color: white; border: none; padding: 8px 14px; cursor: pointer; border-radius: 5px; }
+        .action-inline { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+        .small-btn { border: none; padding: 6px 10px; border-radius: 4px; cursor: pointer; }
+        .save-btn { background: #0d6efd; color: white; }
+        .password-btn { background: #6f42c1; color: white; }
     </style>
 </head>
 <body>
@@ -65,6 +72,30 @@
     </div>
 
     <div id="authMessage" style="margin-top: 8px; color: #6c757d; font-size: 14px;"></div>
+
+    <div id="usersManagementSection" style="display: none; margin-top: 20px;">
+        <h2>Zarządzanie Użytkownikami</h2>
+        <form id="createUserForm" class="users-form">
+            <input type="text" id="newUsername" placeholder="Nazwa użytkownika" required>
+            <input type="password" id="newUserPassword" placeholder="Hasło" required>
+            <select id="newUserRole" required>
+                <option value="STAFF">STAFF</option>
+                <option value="CUSTOMER">CUSTOMER</option>
+                <option value="OWNER">OWNER</option>
+                <option value="ADMIN">ADMIN</option>
+            </select>
+            <button type="submit">Utwórz użytkownika</button>
+        </form>
+
+        <table id="usersTable">
+            <thead>
+                <tr>
+                    <th>ID</th><th>Użytkownik</th><th>Rola</th><th>Nowe hasło</th><th>Akcje</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
 
     <button class="refresh-btn" onclick="loadData()">Odśwież dane</button>
 
@@ -190,14 +221,21 @@
         return role === 'ADMIN' || role === 'OWNER' || role === 'STAFF';
     }
 
+    function canManageUsers() {
+        const role = getCurrentRole();
+        return role === 'ADMIN' || role === 'OWNER';
+    }
+
     function updatePermissionUI() {
         const canWrite = canModifyData();
+        const canManage = canManageUsers();
         const role = getCurrentRole();
 
         document.querySelector('#addServiceForm').style.display = canWrite ? 'flex' : 'none';
         document.querySelector('#addAppointmentForm').style.display = canWrite ? 'flex' : 'none';
         document.querySelector('#serviceActionsHeader').style.display = canWrite ? 'table-cell' : 'none';
         document.querySelector('#appointmentActionsHeader').style.display = canWrite ? 'table-cell' : 'none';
+        document.querySelector('#usersManagementSection').style.display = canManage ? 'block' : 'none';
 
         const authMessage = document.querySelector('#authMessage');
         if (!role) {
@@ -211,6 +249,35 @@
         }
 
         authMessage.textContent = `Rola ${role}: pełna edycja danych.`;
+    }
+
+    function getAssignableRoles() {
+        const role = getCurrentRole();
+        if (role === 'ADMIN') {
+            return ['STAFF', 'CUSTOMER', 'OWNER', 'ADMIN'];
+        }
+        return ['STAFF', 'CUSTOMER'];
+    }
+
+    function renderRoleOptions(selectedRole) {
+        const availableRoles = getAssignableRoles();
+        let options = availableRoles.map(role => `<option value="${role}" ${role === selectedRole ? 'selected' : ''}>${role}</option>`).join('');
+        if (!availableRoles.includes(selectedRole)) {
+            options = `<option value="${selectedRole}" selected disabled>${selectedRole} (tylko ADMIN może zmienić)</option>` + options;
+        }
+        return options;
+    }
+
+    function applyCreateRoleOptions() {
+        const roleSelect = document.querySelector('#newUserRole');
+        const currentValue = roleSelect.value;
+        roleSelect.innerHTML = getAssignableRoles()
+            .map(role => `<option value="${role}">${role}</option>`)
+            .join('');
+
+        if ([...roleSelect.options].some(option => option.value === currentValue)) {
+            roleSelect.value = currentValue;
+        }
     }
 
     async function fetchCurrentUser(credentials) {
@@ -258,6 +325,7 @@
 
         updatePermissionUI();
         await loadData();
+        await loadUsers();
     }
 
     function logout() {
@@ -271,7 +339,9 @@
 
         document.querySelector('#servicesTable tbody').innerHTML = '';
         document.querySelector('#appointmentsTable tbody').innerHTML = '';
+        document.querySelector('#usersTable tbody').innerHTML = '';
         updatePermissionUI();
+        applyCreateRoleOptions();
         loadData();
     }
 
@@ -293,6 +363,7 @@
 
         updatePermissionUI();
         await loadData();
+        await loadUsers();
     }
 
     async function handleAuthResponse(response) {
@@ -353,6 +424,47 @@
         return response.json().catch(() => null);
     }
 
+    async function loadUsers() {
+        if (!canManageUsers()) {
+            document.querySelector('#usersTable tbody').innerHTML = '';
+            return;
+        }
+
+        applyCreateRoleOptions();
+
+        const response = await fetch('http://localhost:8081/api/users', {
+            headers: getAuthHeader()
+        });
+
+        if (!response.ok) {
+            await handleAuthResponse(response);
+            return;
+        }
+
+        const users = await response.json();
+        const usersBody = document.querySelector('#usersTable tbody');
+        usersBody.innerHTML = users.map(user => `
+            <tr>
+                <td>${user.id}</td>
+                <td>${user.username}</td>
+                <td>
+                    <select class="user-role-select" data-id="${user.id}">
+                        ${renderRoleOptions(user.role)}
+                    </select>
+                </td>
+                <td>
+                    <input type="password" class="user-password-input" data-id="${user.id}" placeholder="Nowe hasło">
+                </td>
+                <td>
+                    <div class="action-inline">
+                        <button type="button" class="small-btn save-btn save-user-role-btn" data-id="${user.id}">Zapisz rolę</button>
+                        <button type="button" class="small-btn password-btn reset-user-password-btn" data-id="${user.id}">Zmień hasło</button>
+                    </div>
+                </td>
+            </tr>
+        `).join('');
+    }
+
     // ===== Load Data =====
     async function loadData() {
         const canWrite = canModifyData();
@@ -404,6 +516,146 @@
     function closeEditAppointmentModal() {
         document.querySelector('#editAppointmentModal').classList.remove('show');
     }
+
+    document.querySelector('#createUserForm').addEventListener('submit', async (event) => {
+        event.preventDefault();
+
+        if (!canManageUsers()) {
+            alert('Brak uprawnień do zarządzania użytkownikami.');
+            return;
+        }
+
+        const username = document.querySelector('#newUsername').value.trim();
+        const password = document.querySelector('#newUserPassword').value;
+        const role = document.querySelector('#newUserRole').value;
+
+        if (!username || !password || !role) {
+            alert('Uzupełnij wszystkie pola użytkownika.');
+            return;
+        }
+
+        const response = await fetch('http://localhost:8081/api/users', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                ...getAuthHeader()
+            },
+            body: JSON.stringify({
+                username,
+                password,
+                role
+            })
+        });
+
+        if (!response.ok) {
+            const errorBody = await parseErrorResponse(response);
+            if (await handleAuthResponse(response)) {
+                return;
+            }
+            if (response.status === 400 && errorBody?.errors) {
+                alert(Object.values(errorBody.errors).join('\n'));
+                return;
+            }
+            alert('Nie udało się utworzyć użytkownika.');
+            return;
+        }
+
+        event.target.reset();
+        applyCreateRoleOptions();
+        await loadUsers();
+    });
+
+    document.querySelector('#usersTable tbody').addEventListener('click', async (event) => {
+        const roleBtn = event.target.closest('.save-user-role-btn');
+        if (roleBtn) {
+            if (!canManageUsers()) {
+                alert('Brak uprawnień do zmiany ról.');
+                return;
+            }
+
+            const id = roleBtn.dataset.id;
+            const roleSelect = document.querySelector(`.user-role-select[data-id="${id}"]`);
+            if (!roleSelect) {
+                return;
+            }
+
+            const response = await fetch(`http://localhost:8081/api/users/${id}/role`, {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json',
+                    ...getAuthHeader()
+                },
+                body: JSON.stringify({
+                    role: roleSelect.value
+                })
+            });
+
+            if (!response.ok) {
+                const errorBody = await parseErrorResponse(response);
+                if (await handleAuthResponse(response)) {
+                    return;
+                }
+                if (response.status === 400 && errorBody?.errors) {
+                    alert(Object.values(errorBody.errors).join('\n'));
+                    return;
+                }
+                alert('Nie udało się zaktualizować roli.');
+                return;
+            }
+
+            await loadUsers();
+            return;
+        }
+
+        const passwordBtn = event.target.closest('.reset-user-password-btn');
+        if (!passwordBtn) {
+            return;
+        }
+
+        if (!canManageUsers()) {
+            alert('Brak uprawnień do zmiany hasła użytkownika.');
+            return;
+        }
+
+        const id = passwordBtn.dataset.id;
+        const passwordInput = document.querySelector(`.user-password-input[data-id="${id}"]`);
+        if (!passwordInput) {
+            return;
+        }
+
+        const password = passwordInput.value;
+        if (!password || password.length < 6) {
+            alert('Nowe hasło musi mieć minimum 6 znaków.');
+            return;
+        }
+
+        const response = await fetch(`http://localhost:8081/api/users/${id}/password`, {
+            method: 'PATCH',
+            headers: {
+                'Content-Type': 'application/json',
+                ...getAuthHeader()
+            },
+            body: JSON.stringify({
+                password
+            })
+        });
+
+        if (!response.ok) {
+            const errorBody = await parseErrorResponse(response);
+            if (await handleAuthResponse(response)) {
+                return;
+            }
+            if (response.status === 400 && errorBody?.errors) {
+                alert(Object.values(errorBody.errors).join('\n'));
+                return;
+            }
+            alert('Nie udało się zmienić hasła.');
+            return;
+        }
+
+        passwordInput.value = '';
+        alert('Hasło użytkownika zostało zaktualizowane.');
+    });
 
     // ===== Add Service Form =====
     document.querySelector('#addServiceForm').addEventListener('submit', async (event) => {
