@@ -43,3 +43,5 @@ build/
 *.log
 .DS_Store
 test.http
+.zip
+/stitch_services_menu_extracted/.
