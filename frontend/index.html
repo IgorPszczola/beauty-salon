@@ -218,12 +218,28 @@
             </div>
         </div>
     </div>
+
+    <div id="deleteServiceModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Usuń usługę</h2>
+                <button class="modal-close" onclick="closeDeleteServiceModal()">&times;</button>
+            </div>
+            <p id="deleteServiceModalText">Czy na pewno chcesz usunąć tę usługę?</p>
+            <div class="modal-actions">
+                <button type="button" class="cancel-btn" onclick="closeDeleteServiceModal()">Anuluj</button>
+                <button type="button" id="confirmDeleteServiceBtn" class="confirm-delete-btn">Usuń</button>
+            </div>
+        </div>
+    </div>
 </div>
 
 <script>
     // ===== Authentication Functions =====
     let pendingDeleteUserId = null;
     let pendingDeleteUsername = null;
+    let pendingDeleteServiceId = null;
+    let pendingDeleteServiceName = null;
 
     function getAuthHeader() {
         const credentials = localStorage.getItem('auth_credentials');
@@ -510,6 +526,19 @@
         document.querySelector('#deleteUserModal').classList.add('show');
     }
 
+    function closeDeleteServiceModal() {
+        pendingDeleteServiceId = null;
+        pendingDeleteServiceName = null;
+        document.querySelector('#deleteServiceModal').classList.remove('show');
+    }
+
+    function openDeleteServiceModal(serviceId, serviceName) {
+        pendingDeleteServiceId = serviceId;
+        pendingDeleteServiceName = serviceName;
+        document.querySelector('#deleteServiceModalText').textContent = `Czy na pewno chcesz usunąć usługę "${serviceName}"?`;
+        document.querySelector('#deleteServiceModal').classList.add('show');
+    }
+
     // ===== Load Data =====
     async function loadData() {
         const canWrite = canModifyData();
@@ -528,7 +557,7 @@
                 <td>${s.name}</td>
                 <td>${s.price} zł</td>
                 <td>${s.duration}</td>
-                <td>${canWrite || canDeleteService ? `${canWrite ? `<button type="button" class="edit-service-btn" data-id="${s.id}" data-name="${s.name}" data-price="${s.price}" data-duration="${s.duration}" style="background: #ffc107; color: black; border: none; padding: 5px 10px; cursor: pointer; border-radius: 3px; margin-right: 5px;">Edytuj</button>` : ''}${canDeleteService ? `<button type="button" class="delete-service-btn" data-id="${s.id}" style="background: #dc3545; color: white; border: none; padding: 5px 10px; cursor: pointer; border-radius: 3px;">Usuń</button>` : ''}` : ''}</td>
+                <td>${canWrite || canDeleteService ? `${canWrite ? `<button type="button" class="edit-service-btn" data-id="${s.id}" data-name="${s.name}" data-price="${s.price}" data-duration="${s.duration}" style="background: #ffc107; color: black; border: none; padding: 5px 10px; cursor: pointer; border-radius: 3px; margin-right: 5px;">Edytuj</button>` : ''}${canDeleteService ? `<button type="button" class="delete-service-btn" data-id="${s.id}" data-name="${s.name}" style="background: #dc3545; color: white; border: none; padding: 5px 10px; cursor: pointer; border-radius: 3px;">Usuń</button>` : ''}` : ''}</td>
             </tr>
         `).join('');
         
@@ -781,6 +810,44 @@
         await loadUsers();
     });
 
+    document.querySelector('#confirmDeleteServiceBtn').addEventListener('click', async () => {
+        if (!pendingDeleteServiceId) {
+            return;
+        }
+
+        const confirmButton = document.querySelector('#confirmDeleteServiceBtn');
+        const originalLabel = confirmButton.textContent;
+        confirmButton.disabled = true;
+        confirmButton.textContent = 'Usuwanie...';
+
+        try {
+            const response = await fetch(`http://localhost:8081/api/services/${pendingDeleteServiceId}`, {
+                method: 'DELETE',
+                headers: getAuthHeader()
+            });
+
+            if (!response.ok) {
+                const errorBody = await parseErrorResponse(response);
+                if (await handleAuthResponse(response)) {
+                    closeDeleteServiceModal();
+                    return;
+                }
+                if (response.status === 400 && errorBody?.errors) {
+                    alert(Object.values(errorBody.errors).join('\n'));
+                    return;
+                }
+                alert('Nie udało się usunąć usługi.');
+                return;
+            }
+
+            closeDeleteServiceModal();
+            await loadData();
+        } finally {
+            confirmButton.disabled = false;
+            confirmButton.textContent = originalLabel;
+        }
+    });
+
     // ===== Add Service Form =====
     document.querySelector('#addServiceForm').addEventListener('submit', async (event) => {
         event.preventDefault();
@@ -853,29 +920,7 @@
                 return;
             }
 
-            if (!confirm('Na pewno chcesz usunąć tę usługę?')) {
-                return;
-            }
-
-            const response = await fetch(`http://localhost:8081/api/services/${id}`, {
-                method: 'DELETE',
-                headers: getAuthHeader()
-            });
-
-            if (!response.ok) {
-                const errorBody = await parseErrorResponse(response);
-                if (await handleAuthResponse(response)) {
-                    return;
-                }
-                if (response.status === 400 && errorBody?.errors) {
-                    alert(Object.values(errorBody.errors).join('\n'));
-                    return;
-                }
-                alert('Nie udało się usunąć usługi.');
-                return;
-            }
-
-            await loadData();
+            openDeleteServiceModal(id, deleteBtn.dataset.name || '');
             return;
         }
 
@@ -1158,6 +1203,9 @@
         }
         if (event.target.id === 'deleteUserModal' && event.target.classList.contains('modal')) {
             closeDeleteUserModal();
+        }
+        if (event.target.id === 'deleteServiceModal' && event.target.classList.contains('modal')) {
+            closeDeleteServiceModal();
         }
     });
 
