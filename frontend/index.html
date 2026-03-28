@@ -54,6 +54,12 @@
         .small-btn { border: none; padding: 6px 10px; border-radius: 4px; cursor: pointer; }
         .save-btn { background: #0d6efd; color: white; }
         .password-btn { background: #6f42c1; color: white; }
+        .toggle-btn { background: #fd7e14; color: white; }
+        .delete-user-btn { background: #dc3545; color: white; }
+        .small-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        .modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 16px; }
+        .cancel-btn { background: #6c757d; color: white; border: none; padding: 8px 14px; border-radius: 5px; cursor: pointer; }
+        .confirm-delete-btn { background: #dc3545; color: white; border: none; padding: 8px 14px; border-radius: 5px; cursor: pointer; }
     </style>
 </head>
 <body>
@@ -90,7 +96,7 @@
         <table id="usersTable">
             <thead>
                 <tr>
-                    <th>ID</th><th>Użytkownik</th><th>Rola</th><th>Nowe hasło</th><th>Akcje</th>
+                    <th>ID</th><th>Użytkownik</th><th>Rola</th><th>Status</th><th>Nowe hasło</th><th>Akcje</th>
                 </tr>
             </thead>
             <tbody></tbody>
@@ -198,10 +204,27 @@
             </form>
         </div>
     </div>
+
+    <div id="deleteUserModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Usuń użytkownika</h2>
+                <button class="modal-close" onclick="closeDeleteUserModal()">&times;</button>
+            </div>
+            <p id="deleteUserModalText">Czy na pewno chcesz usunąć użytkownika?</p>
+            <div class="modal-actions">
+                <button type="button" class="cancel-btn" onclick="closeDeleteUserModal()">Anuluj</button>
+                <button type="button" id="confirmDeleteUserBtn" class="confirm-delete-btn">Usuń</button>
+            </div>
+        </div>
+    </div>
 </div>
 
 <script>
     // ===== Authentication Functions =====
+    let pendingDeleteUserId = null;
+    let pendingDeleteUsername = null;
+
     function getAuthHeader() {
         const credentials = localStorage.getItem('auth_credentials');
         if (!credentials) {
@@ -219,6 +242,11 @@
     function canModifyData() {
         const role = getCurrentRole();
         return role === 'ADMIN' || role === 'OWNER' || role === 'STAFF';
+    }
+
+    function canDeleteServices() {
+        const role = getCurrentRole();
+        return role === 'ADMIN' || role === 'OWNER';
     }
 
     function canManageUsers() {
@@ -443,6 +471,7 @@
 
         const users = await response.json();
         const usersBody = document.querySelector('#usersTable tbody');
+        const currentUsername = localStorage.getItem('username');
         usersBody.innerHTML = users.map(user => `
             <tr>
                 <td>${user.id}</td>
@@ -452,6 +481,7 @@
                         ${renderRoleOptions(user.role)}
                     </select>
                 </td>
+                <td>${user.enabled ? 'AKTYWNY' : 'ZABLOKOWANY'}</td>
                 <td>
                     <input type="password" class="user-password-input" data-id="${user.id}" placeholder="Nowe hasło">
                 </td>
@@ -459,15 +489,31 @@
                     <div class="action-inline">
                         <button type="button" class="small-btn save-btn save-user-role-btn" data-id="${user.id}">Zapisz rolę</button>
                         <button type="button" class="small-btn password-btn reset-user-password-btn" data-id="${user.id}">Zmień hasło</button>
+                        <button type="button" class="small-btn toggle-btn toggle-user-enabled-btn" data-id="${user.id}" data-enabled="${user.enabled}" data-username="${user.username}" ${user.username === currentUsername ? 'disabled title="Nie możesz zablokować własnego konta"' : ''}>${user.enabled ? 'Zablokuj' : 'Odblokuj'}</button>
+                        <button type="button" class="small-btn delete-user-btn delete-user-btn-action" data-id="${user.id}" data-username="${user.username}" ${user.username === currentUsername ? 'disabled title="Nie możesz usunąć własnego konta"' : ''}>Usuń</button>
                     </div>
                 </td>
             </tr>
         `).join('');
     }
 
+    function closeDeleteUserModal() {
+        pendingDeleteUserId = null;
+        pendingDeleteUsername = null;
+        document.querySelector('#deleteUserModal').classList.remove('show');
+    }
+
+    function openDeleteUserModal(userId, username) {
+        pendingDeleteUserId = userId;
+        pendingDeleteUsername = username;
+        document.querySelector('#deleteUserModalText').textContent = `Czy na pewno chcesz usunąć użytkownika "${username}"?`;
+        document.querySelector('#deleteUserModal').classList.add('show');
+    }
+
     // ===== Load Data =====
     async function loadData() {
         const canWrite = canModifyData();
+        const canDeleteService = canDeleteServices();
 
         // Get Services
         const resServices = await fetch('http://localhost:8081/api/services');
@@ -482,7 +528,7 @@
                 <td>${s.name}</td>
                 <td>${s.price} zł</td>
                 <td>${s.duration}</td>
-                <td>${canWrite ? `<button type="button" class="edit-service-btn" data-id="${s.id}" data-name="${s.name}" data-price="${s.price}" data-duration="${s.duration}" style="background: #ffc107; color: black; border: none; padding: 5px 10px; cursor: pointer; border-radius: 3px;">Edytuj</button>` : ''}</td>
+                <td>${canWrite || canDeleteService ? `${canWrite ? `<button type="button" class="edit-service-btn" data-id="${s.id}" data-name="${s.name}" data-price="${s.price}" data-duration="${s.duration}" style="background: #ffc107; color: black; border: none; padding: 5px 10px; cursor: pointer; border-radius: 3px; margin-right: 5px;">Edytuj</button>` : ''}${canDeleteService ? `<button type="button" class="delete-service-btn" data-id="${s.id}" style="background: #dc3545; color: white; border: none; padding: 5px 10px; cursor: pointer; border-radius: 3px;">Usuń</button>` : ''}` : ''}</td>
             </tr>
         `).join('');
         
@@ -607,6 +653,56 @@
             return;
         }
 
+        const toggleBtn = event.target.closest('.toggle-user-enabled-btn');
+        if (toggleBtn) {
+            if (!canManageUsers()) {
+                alert('Brak uprawnień do blokowania użytkowników.');
+                return;
+            }
+
+            const id = toggleBtn.dataset.id;
+            const currentlyEnabled = toggleBtn.dataset.enabled === 'true';
+            const nextEnabled = !currentlyEnabled;
+
+            const response = await fetch(`http://localhost:8081/api/users/${id}/enabled`, {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json',
+                    ...getAuthHeader()
+                },
+                body: JSON.stringify({
+                    enabled: nextEnabled
+                })
+            });
+
+            if (!response.ok) {
+                const errorBody = await parseErrorResponse(response);
+                if (await handleAuthResponse(response)) {
+                    return;
+                }
+                if (response.status === 400 && errorBody?.errors) {
+                    alert(Object.values(errorBody.errors).join('\n'));
+                    return;
+                }
+                alert('Nie udało się zmienić statusu użytkownika.');
+                return;
+            }
+
+            await loadUsers();
+            return;
+        }
+
+        const deleteBtn = event.target.closest('.delete-user-btn-action');
+        if (deleteBtn) {
+            if (!canManageUsers()) {
+                alert('Brak uprawnień do usuwania użytkowników.');
+                return;
+            }
+
+            openDeleteUserModal(deleteBtn.dataset.id, deleteBtn.dataset.username || '');
+            return;
+        }
+
         const passwordBtn = event.target.closest('.reset-user-password-btn');
         if (!passwordBtn) {
             return;
@@ -655,6 +751,34 @@
 
         passwordInput.value = '';
         alert('Hasło użytkownika zostało zaktualizowane.');
+    });
+
+    document.querySelector('#confirmDeleteUserBtn').addEventListener('click', async () => {
+        if (!pendingDeleteUserId) {
+            return;
+        }
+
+        const response = await fetch(`http://localhost:8081/api/users/${pendingDeleteUserId}`, {
+            method: 'DELETE',
+            headers: getAuthHeader()
+        });
+
+        if (!response.ok) {
+            const errorBody = await parseErrorResponse(response);
+            if (await handleAuthResponse(response)) {
+                closeDeleteUserModal();
+                return;
+            }
+            if (response.status === 400 && errorBody?.errors) {
+                alert(Object.values(errorBody.errors).join('\n'));
+                return;
+            }
+            alert('Nie udało się usunąć użytkownika.');
+            return;
+        }
+
+        closeDeleteUserModal();
+        await loadUsers();
     });
 
     // ===== Add Service Form =====
@@ -717,6 +841,44 @@
 
     // ===== Edit Service Modal =====
     document.querySelector('#servicesTable tbody').addEventListener('click', async (event) => {
+        const deleteBtn = event.target.closest('.delete-service-btn');
+        if (deleteBtn) {
+            if (!canDeleteServices()) {
+                alert('Brak uprawnień do usuwania usług.');
+                return;
+            }
+
+            const id = deleteBtn.dataset.id;
+            if (!id) {
+                return;
+            }
+
+            if (!confirm('Na pewno chcesz usunąć tę usługę?')) {
+                return;
+            }
+
+            const response = await fetch(`http://localhost:8081/api/services/${id}`, {
+                method: 'DELETE',
+                headers: getAuthHeader()
+            });
+
+            if (!response.ok) {
+                const errorBody = await parseErrorResponse(response);
+                if (await handleAuthResponse(response)) {
+                    return;
+                }
+                if (response.status === 400 && errorBody?.errors) {
+                    alert(Object.values(errorBody.errors).join('\n'));
+                    return;
+                }
+                alert('Nie udało się usunąć usługi.');
+                return;
+            }
+
+            await loadData();
+            return;
+        }
+
         const editBtn = event.target.closest('.edit-service-btn');
         if (!editBtn) {
             return;
@@ -993,6 +1155,9 @@
         }
         if (event.target.id === 'editAppointmentModal' && event.target.classList.contains('modal')) {
             closeEditAppointmentModal();
+        }
+        if (event.target.id === 'deleteUserModal' && event.target.classList.contains('modal')) {
+            closeDeleteUserModal();
         }
     });
 

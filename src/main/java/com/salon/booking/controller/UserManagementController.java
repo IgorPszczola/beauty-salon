@@ -2,6 +2,7 @@ package com.salon.booking.controller;
 
 import com.salon.booking.dto.CreateUserRequest;
 import com.salon.booking.dto.ResetUserPasswordRequest;
+import com.salon.booking.dto.UpdateUserEnabledRequest;
 import com.salon.booking.dto.UpdateUserRoleRequest;
 import com.salon.booking.dto.UserSummaryResponse;
 import com.salon.booking.model.AppUser;
@@ -13,6 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -37,7 +39,7 @@ public class UserManagementController {
     @GetMapping
     public List<UserSummaryResponse> getUsers() {
         return appUserRepository.findAll().stream()
-                .map(user -> new UserSummaryResponse(user.getId(), user.getUsername(), user.getRole().name()))
+                .map(this::toUserSummary)
                 .sorted((a, b) -> a.username().compareToIgnoreCase(b.username()))
                 .toList();
     }
@@ -55,9 +57,10 @@ public class UserManagementController {
         user.setUsername(request.getUsername().trim());
         user.setPassword(passwordEncoder.encode(request.getPassword()));
         user.setRole(request.getRole());
+        user.setEnabled(true);
 
         AppUser saved = appUserRepository.save(user);
-        return ResponseEntity.ok(new UserSummaryResponse(saved.getId(), saved.getUsername(), saved.getRole().name()));
+        return ResponseEntity.ok(toUserSummary(saved));
     }
 
     @PatchMapping("/{id}/role")
@@ -73,10 +76,12 @@ public class UserManagementController {
             throw new FieldValidationException("role", "You cannot change your own role");
         }
 
+        ensureCanManageTargetUser(authentication, user);
+
         user.setRole(request.getRole());
         AppUser updated = appUserRepository.save(user);
 
-        return ResponseEntity.ok(new UserSummaryResponse(updated.getId(), updated.getUsername(), updated.getRole().name()));
+        return ResponseEntity.ok(toUserSummary(updated));
     }
 
     @PatchMapping("/{id}/password")
@@ -86,6 +91,8 @@ public class UserManagementController {
         AppUser user = appUserRepository.findById(id)
                 .orElseThrow(() -> new FieldValidationException("id", "User not found"));
 
+        ensureCanManageTargetUser(authentication, user);
+
         if (authentication.getName().equals(user.getUsername()) && user.getRole() == UserRole.CUSTOMER) {
             throw new FieldValidationException("password", "Customer cannot reset own password here");
         }
@@ -93,6 +100,39 @@ public class UserManagementController {
         user.setPassword(passwordEncoder.encode(request.getPassword()));
         appUserRepository.save(user);
 
+        return ResponseEntity.noContent().build();
+    }
+
+    @PatchMapping("/{id}/enabled")
+    public ResponseEntity<UserSummaryResponse> updateEnabled(@PathVariable Long id,
+                                                             @Valid @RequestBody UpdateUserEnabledRequest request,
+                                                             Authentication authentication) {
+        AppUser user = appUserRepository.findById(id)
+                .orElseThrow(() -> new FieldValidationException("id", "User not found"));
+
+        ensureCanManageTargetUser(authentication, user);
+
+        if (authentication.getName().equals(user.getUsername()) && Boolean.FALSE.equals(request.getEnabled())) {
+            throw new FieldValidationException("enabled", "You cannot disable your own account");
+        }
+
+        user.setEnabled(request.getEnabled());
+        AppUser updated = appUserRepository.save(user);
+        return ResponseEntity.ok(toUserSummary(updated));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteUser(@PathVariable Long id, Authentication authentication) {
+        AppUser user = appUserRepository.findById(id)
+                .orElseThrow(() -> new FieldValidationException("id", "User not found"));
+
+        ensureCanManageTargetUser(authentication, user);
+
+        if (authentication.getName().equals(user.getUsername())) {
+            throw new FieldValidationException("id", "You cannot delete your own account");
+        }
+
+        appUserRepository.deleteById(id);
         return ResponseEntity.noContent().build();
     }
 
@@ -105,5 +145,23 @@ public class UserManagementController {
                 throw new FieldValidationException("role", "Only ADMIN can assign ADMIN or OWNER role");
             }
         }
+    }
+
+    private void ensureCanManageTargetUser(Authentication authentication, AppUser targetUser) {
+        boolean isAdmin = authentication.getAuthorities().stream()
+                .anyMatch(authority -> "ROLE_ADMIN".equals(authority.getAuthority()));
+
+        if ((targetUser.getRole() == UserRole.ADMIN || targetUser.getRole() == UserRole.OWNER) && !isAdmin) {
+            throw new FieldValidationException("role", "Only ADMIN can manage ADMIN or OWNER accounts");
+        }
+    }
+
+    private UserSummaryResponse toUserSummary(AppUser user) {
+        return new UserSummaryResponse(
+                user.getId(),
+                user.getUsername(),
+                user.getRole().name(),
+                Boolean.TRUE.equals(user.getEnabled())
+        );
     }
 }

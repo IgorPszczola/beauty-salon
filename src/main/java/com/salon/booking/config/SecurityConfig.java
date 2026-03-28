@@ -17,6 +17,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.jdbc.core.JdbcTemplate;
 
 @Configuration
 @EnableWebSecurity
@@ -37,6 +38,7 @@ public class SecurityConfig {
                     .username(appUser.getUsername())
                     .password(appUser.getPassword())
                     .roles(appUser.getRole().name())
+                    .disabled(Boolean.FALSE.equals(appUser.getEnabled()))
                     .build();
 
             return user;
@@ -44,8 +46,13 @@ public class SecurityConfig {
     }
 
     @Bean
-    public CommandLineRunner seedUsers(AppUserRepository appUserRepository, PasswordEncoder passwordEncoder) {
+    public CommandLineRunner seedUsers(AppUserRepository appUserRepository,
+                                       PasswordEncoder passwordEncoder,
+                                       JdbcTemplate jdbcTemplate) {
         return args -> {
+            jdbcTemplate.execute("ALTER TABLE app_users ADD COLUMN IF NOT EXISTS enabled BOOLEAN DEFAULT TRUE");
+            jdbcTemplate.execute("UPDATE app_users SET enabled = TRUE WHERE enabled IS NULL");
+
             createUserIfMissing(appUserRepository, passwordEncoder, "admin", "admin123", UserRole.ADMIN);
             createUserIfMissing(appUserRepository, passwordEncoder, "owner", "owner123", UserRole.OWNER);
             createUserIfMissing(appUserRepository, passwordEncoder, "staff", "staff123", UserRole.STAFF);
@@ -58,7 +65,12 @@ public class SecurityConfig {
                                      String username,
                                      String rawPassword,
                                      UserRole role) {
-        if (appUserRepository.existsByUsername(username)) {
+        AppUser existingUser = appUserRepository.findByUsername(username).orElse(null);
+        if (existingUser != null) {
+            if (!Boolean.TRUE.equals(existingUser.getEnabled())) {
+                existingUser.setEnabled(true);
+                appUserRepository.save(existingUser);
+            }
             return;
         }
 
@@ -66,6 +78,7 @@ public class SecurityConfig {
         user.setUsername(username);
         user.setPassword(passwordEncoder.encode(rawPassword));
         user.setRole(role);
+        user.setEnabled(true);
         appUserRepository.save(user);
     }
 
@@ -80,8 +93,10 @@ public class SecurityConfig {
                     .requestMatchers(HttpMethod.GET, "/api/users").hasAnyRole("ADMIN", "OWNER")
                     .requestMatchers(HttpMethod.POST, "/api/users").hasAnyRole("ADMIN", "OWNER")
                     .requestMatchers(HttpMethod.PATCH, "/api/users/**").hasAnyRole("ADMIN", "OWNER")
+                    .requestMatchers(HttpMethod.DELETE, "/api/users/**").hasAnyRole("ADMIN", "OWNER")
                     .requestMatchers(HttpMethod.POST, "/api/services", "/api/appointments").hasAnyRole("ADMIN", "OWNER", "STAFF")
                     .requestMatchers(HttpMethod.PATCH, "/api/services/**", "/api/appointments/**").hasAnyRole("ADMIN", "OWNER", "STAFF")
+                    .requestMatchers(HttpMethod.DELETE, "/api/services/**").hasAnyRole("ADMIN", "OWNER")
                     .requestMatchers(HttpMethod.DELETE, "/api/appointments/**").hasAnyRole("ADMIN", "OWNER", "STAFF")
                     .anyRequest().permitAll()
                 )

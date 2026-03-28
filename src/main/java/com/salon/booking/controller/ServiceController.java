@@ -6,6 +6,7 @@ import com.salon.booking.dto.ServiceResponse;
 import com.salon.booking.model.Service;
 import com.salon.booking.repository.ServiceRepository;
 import jakarta.validation.Valid;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
@@ -51,6 +52,21 @@ public class ServiceController {
 
         Service updatedService = serviceRepository.save(service);
         return ResponseEntity.ok(toServiceResponse(updatedService));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteService(@PathVariable Long id) {
+        if (!serviceRepository.existsById(id)) {
+            return ResponseEntity.notFound().build();
+        }
+
+        try {
+            serviceRepository.deleteById(id);
+        } catch (DataIntegrityViolationException exception) {
+            throw new FieldValidationException("id", "Cannot delete service linked to existing appointments");
+        }
+
+        return ResponseEntity.noContent().build();
     }
 
     private ServiceResponse toServiceResponse(Service service) {
