@@ -1,7 +1,9 @@
 package com.salon.booking;
 
 import com.salon.booking.model.Appointment;
+import com.salon.booking.model.AppUser;
 import com.salon.booking.model.Service;
+import com.salon.booking.repository.AppUserRepository;
 import com.salon.booking.repository.AppointmentRepository;
 import com.salon.booking.repository.ServiceRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -41,6 +43,9 @@ class ServiceDeleteIntegrationTest {
     @Autowired
     private AppointmentRepository appointmentRepository;
 
+    @Autowired
+    private AppUserRepository appUserRepository;
+
     @BeforeEach
     void cleanDatabase() {
         restTemplate.setErrorHandler(new ResponseErrorHandler() {
@@ -58,6 +63,10 @@ class ServiceDeleteIntegrationTest {
         });
         appointmentRepository.deleteAll();
         serviceRepository.deleteAll();
+        enableUser("admin");
+        enableUser("owner");
+        enableUser("staff");
+        enableUser("customer");
     }
 
     @Test
@@ -165,6 +174,57 @@ class ServiceDeleteIntegrationTest {
         assertTrue(serviceRepository.existsById(service.getId()));
     }
 
+    @Test
+    void deletingNonExistingServiceReturnsNotFound() {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setBasicAuth("admin", "admin123");
+
+        ResponseEntity<Void> response = restTemplate.exchange(
+            baseUrl("/api/services/999999"),
+            HttpMethod.DELETE,
+            new HttpEntity<>(headers),
+            Void.class
+        );
+
+        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+    }
+
+    @Test
+    void deletingServiceWithoutAuthenticationReturnsUnauthorized() {
+        Service service = createService("Auth Required Service");
+
+        ResponseEntity<Void> response = restTemplate.exchange(
+            baseUrl("/api/services/" + service.getId()),
+            HttpMethod.DELETE,
+            HttpEntity.EMPTY,
+            Void.class
+        );
+
+        assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
+        assertTrue(serviceRepository.existsById(service.getId()));
+    }
+
+    @Test
+    void disabledAdminCannotDeleteService() {
+        Service service = createService("Disabled Admin Service");
+        AppUser admin = appUserRepository.findByUsername("admin").orElseThrow();
+        admin.setEnabled(false);
+        appUserRepository.save(admin);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setBasicAuth("admin", "admin123");
+
+        ResponseEntity<Void> response = restTemplate.exchange(
+            baseUrl("/api/services/" + service.getId()),
+            HttpMethod.DELETE,
+            new HttpEntity<>(headers),
+            Void.class
+        );
+
+        assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
+        assertTrue(serviceRepository.existsById(service.getId()));
+    }
+
     private Service createService(String name) {
         Service service = new Service();
         service.setName(name);
@@ -176,5 +236,12 @@ class ServiceDeleteIntegrationTest {
 
     private String baseUrl(String path) {
         return "http://localhost:" + port + path;
+    }
+
+    private void enableUser(String username) {
+        appUserRepository.findByUsername(username).ifPresent(user -> {
+            user.setEnabled(true);
+            appUserRepository.save(user);
+        });
     }
 }
