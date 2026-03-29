@@ -7,6 +7,7 @@ public record AppointmentResponse(
         String clientName,
         LocalDateTime appointmentTime,
         String status,
+        String artist,
         AppointmentServiceResponse service
 ) {
 }

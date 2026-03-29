@@ -419,10 +419,11 @@
             <a class="active" href="lookbook.html">Gallery</a>
             <a href="index.html#aboutSection">About</a>
             <a href="index.html#reviewsSection">Reviews</a>
+            <button type="button" id="navBookingButton" style="display: none;" onclick="window.location.href='booking.html'">Book</button>
             <button type="button" id="navStuffButton" style="display: none;" onclick="navigateToSection('stuff')">Stuff</button>
             <button type="button" id="navOrganizationButton" style="display: none;" onclick="navigateToSection('organization')">Organization</button>
         </nav>
-        <a class="hero-btn" href="index.html">Back To Main</a>
+        <button type="button" class="hero-btn" id="logoutButton" onclick="logout()" style="display: none;">Wyloguj</button>
     </div>
 </header>
 
@@ -484,6 +485,20 @@
 
     let currentFilter = 'all';
 
+    function logout() {
+        localStorage.removeItem('auth_credentials');
+        localStorage.removeItem('username');
+        localStorage.removeItem('role');
+        window.location.href = 'index.html';
+    }
+
+    function updateLogoutButtonVisibility() {
+        const logoutButton = document.querySelector('#logoutButton');
+        if (logoutButton) {
+            logoutButton.style.display = localStorage.getItem('auth_credentials') ? 'inline-block' : 'none';
+        }
+    }
+
     function renderGallery(filter = 'all') {
         const stateNode = document.querySelector('#lookbookState');
         const gridNode = document.querySelector('#lookbookGrid');
@@ -532,34 +547,34 @@
         });
     });
 
-    // Admin navigation
+    // Role-based navigation
+    function getCurrentRole() {
+        return localStorage.getItem('role');
+    }
+
+    function canAccessCustomerBooking() {
+        const role = getCurrentRole();
+        return role === 'CUSTOMER' || role === 'OWNER' || role === 'ADMIN';
+    }
+
     function canManageAppointments() {
-        const credentials = localStorage.getItem('auth_credentials');
-        if (!credentials) return false;
-        try {
-            const decoded = atob(credentials);
-            const [username] = decoded.split(':');
-            return ['admin', 'staff', 'owner'].includes(username.toLowerCase());
-        } catch {
-            return false;
-        }
+        const role = getCurrentRole();
+        return role === 'ADMIN' || role === 'OWNER' || role === 'STAFF';
     }
 
     function canManageServices() {
-        const credentials = localStorage.getItem('auth_credentials');
-        if (!credentials) return false;
-        try {
-            const decoded = atob(credentials);
-            const [username] = decoded.split(':');
-            return ['admin', 'owner'].includes(username.toLowerCase());
-        } catch {
-            return false;
-        }
+        const role = getCurrentRole();
+        return role === 'ADMIN' || role === 'OWNER';
     }
 
     function updateLookbookNavUI() {
+        const bookingButton = document.querySelector('#navBookingButton');
         const stuffButton = document.querySelector('#navStuffButton');
         const organizationButton = document.querySelector('#navOrganizationButton');
+
+        if (bookingButton) {
+            bookingButton.style.display = canAccessCustomerBooking() ? 'inline-block' : 'none';
+        }
 
         if (stuffButton) {
             stuffButton.style.display = canManageAppointments() ? 'inline-block' : 'none';
@@ -570,11 +585,26 @@
     }
 
     function navigateToSection(section) {
-        window.location.href = `index.html#${section === 'stuff' ? 'stuffSection' : 'organizationSection'}`;
+        window.location.href = `index.html?view=${section === 'stuff' ? 'stuff' : 'organization'}`;
+    }
+
+    function logout() {
+        localStorage.removeItem('auth_credentials');
+        localStorage.removeItem('username');
+        localStorage.removeItem('role');
+        window.location.href = 'index.html';
+    }
+
+    function updateLogoutButtonVisibility() {
+        const logoutButton = document.querySelector('#logoutButton');
+        if (logoutButton) {
+            logoutButton.style.display = localStorage.getItem('auth_credentials') ? 'inline-block' : 'none';
+        }
     }
 
     // Initialize on page load
     updateLookbookNavUI();
+    updateLogoutButtonVisibility();
     renderGallery();
 </script>
 </body>

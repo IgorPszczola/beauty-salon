@@ -456,6 +456,299 @@
             margin-bottom: 0.7rem;
         }
 
+        /* Calendar Styles */
+        .calendar-wrapper {
+            margin-bottom: 2rem;
+            background: var(--surface-card);
+            border-radius: var(--radius-lg);
+            padding: 1rem;
+            border: 1px solid var(--outline);
+            display: grid;
+            grid-template-columns: minmax(720px, 1fr) minmax(320px, 380px);
+            gap: 1.5rem;
+            align-items: start;
+            overflow-x: auto;
+        }
+
+        .calendar-container {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.2rem;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .calendar-header button {
+            padding: 0.5rem 1rem;
+            background: var(--surface-low);
+            border: 1px solid var(--outline);
+            border-radius: 0.5rem;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.15s ease;
+        }
+
+        .calendar-header button:hover {
+            background: var(--primary-soft);
+            border-color: var(--primary);
+        }
+
+        .calendar-month-year {
+            font-size: 1.1rem;
+            font-weight: 600;
+            font-family: "Noto Serif", serif;
+        }
+
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 0.6rem;
+            margin-bottom: 1rem;
+        }
+
+        .calendar-day-header {
+            background: var(--primary);
+            color: white;
+            padding: 0.6rem;
+            text-align: center;
+            font-weight: 600;
+            font-size: 0.8rem;
+            border-radius: 0.4rem;
+        }
+
+        .calendar-day {
+            border: 1px solid var(--outline);
+            border-radius: 0.6rem;
+            padding: 0.6rem;
+            min-height: 100px;
+            background: var(--surface);
+            cursor: pointer;
+            transition: all 0.15s ease;
+            display: flex;
+            flex-direction: column;
+            font-size: 0.85rem;
+        }
+
+        .calendar-day:hover {
+            border-color: var(--primary);
+            box-shadow: 0 2px 8px rgba(115, 88, 85, 0.1);
+        }
+
+        .calendar-day.other-month {
+            color: var(--text-soft);
+            background: var(--surface-low);
+        }
+
+        .calendar-day.today {
+            border: 2px solid var(--primary);
+            background: rgba(232, 197, 193, 0.2);
+        }
+
+        .calendar-day.selected {
+            border: 2px solid var(--primary);
+            background: var(--primary-soft);
+            font-weight: 600;
+        }
+
+        .calendar-day-number {
+            font-weight: 600;
+            margin-bottom: 0.4rem;
+            color: var(--text);
+        }
+
+        .calendar-appointment-item {
+            background: var(--primary-soft);
+            padding: 0.3rem 0.4rem;
+            border-radius: 0.3rem;
+            margin-bottom: 0.2rem;
+            color: var(--text);
+            font-size: 0.75rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+
+        .calendar-appointment-item:hover {
+            background: var(--primary);
+            color: white;
+        }
+
+        .day-details-panel {
+            background: var(--surface-low);
+            border: 1px solid var(--outline);
+            border-radius: var(--radius-lg);
+            padding: 1.2rem;
+            display: none;
+            flex-direction: column;
+            min-height: 100%;
+        }
+
+        .day-details-panel.show {
+            display: flex;
+        }
+
+        .day-details-header {
+            margin-bottom: 1.2rem;
+            border-bottom: 2px solid var(--primary);
+            padding-bottom: 1rem;
+        }
+
+        .day-details-header h3 {
+            margin: 0 0 0.5rem 0;
+            font-size: 1.3rem;
+            color: var(--text);
+        }
+
+        .day-details-header p {
+            margin: 0;
+            color: var(--text-soft);
+            font-size: 0.9rem;
+        }
+
+        .employee-filter {
+            margin-bottom: 1.2rem;
+        }
+
+        .employee-filter label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        .employee-filter select {
+            width: 100%;
+            padding: 0.6rem;
+            border: 1px solid var(--outline);
+            border-radius: 0.5rem;
+            background: var(--surface-card);
+            color: var(--text);
+            cursor: pointer;
+        }
+
+        .appointments-list {
+            flex: 1;
+            overflow-y: auto;
+            max-height: 560px;
+        }
+
+        .appointment-card {
+            background: var(--surface-card);
+            border-left: 3px solid var(--primary);
+            border-radius: 0.5rem;
+            padding: 0.8rem;
+            margin-bottom: 0.8rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .appointment-card h4 {
+            margin: 0 0 0.4rem 0;
+            font-size: 1rem;
+            color: var(--text);
+        }
+
+        .appointment-card p {
+            margin: 0.2rem 0;
+            font-size: 0.85rem;
+            color: var(--text-soft);
+        }
+
+        .no-appointments {
+            text-align: center;
+            color: var(--text-soft);
+            padding: 2rem 0;
+        }
+
+        @media (max-width: 1280px) {
+            .calendar-wrapper {
+                grid-template-columns: 1fr;
+                overflow-x: visible;
+            }
+
+            .appointments-list {
+                max-height: none;
+            }
+        }
+
+        .appointment-details-card {
+            background: var(--surface-card);
+            border: 1px solid var(--outline);
+            border-radius: var(--radius-lg);
+            padding: 1rem;
+            margin-top: 1rem;
+            display: none;
+        }
+
+        .appointment-details-card.show {
+            display: block;
+        }
+
+        .appointment-details-card h3 {
+            margin-top: 0;
+            margin-bottom: 1rem;
+            font-size: 1.1rem;
+        }
+
+        .appointment-detail-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.6rem 0;
+            border-bottom: 1px solid var(--outline);
+        }
+
+        .appointment-detail-row:last-child {
+            border-bottom: none;
+        }
+
+        .appointment-detail-label {
+            font-weight: 600;
+            color: var(--text-soft);
+        }
+
+        .appointment-detail-value {
+            color: var(--text);
+        }
+
+        .artist-assignment {
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--outline);
+        }
+
+        .artist-assignment label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+
+        .artist-assignment select {
+            width: 100%;
+            margin-bottom: 0.6rem;
+        }
+
+        .artist-assignment button {
+            padding: 0.6rem 1rem;
+            background: linear-gradient(135deg, var(--primary), var(--primary-soft));
+            color: white;
+            border: 0;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.15s ease;
+        }
+
+        .artist-assignment button:hover {
+            opacity: 0.92;
+        }
+
         .login-form,
         .service-form,
         .appointment-form,
@@ -609,6 +902,7 @@
             <button type="button" onclick="window.location.href='lookbook.html'">Gallery</button>
             <button type="button" onclick="showMarketingSection('aboutSection')">About</button>
             <button type="button" onclick="showMarketingSection('reviewsSection')">Reviews</button>
+            <button type="button" id="navBookingButton" style="display: none;" onclick="window.location.href='booking.html'">Book</button>
             <button type="button" id="navStuffButton" style="display: none;" onclick="openRoleMarketingView('stuff')">Stuff</button>
             <button type="button" id="navOrganizationButton" style="display: none;" onclick="openRoleMarketingView('organization')">Organization</button>
         </div>
@@ -757,6 +1051,69 @@
             <section class="panel" id="appointmentsPanel">
                 <h2>Zaplanowane Wizyty</h2>
                 <p class="panel-note">Appointments</p>
+
+                <!-- Calendar View -->
+                <div class="calendar-wrapper">
+                    <div class="calendar-container">
+                        <div class="calendar-header">
+                            <button onclick="calendarPreviousMonth()">&larr; Poprzedni</button>
+                            <div class="calendar-month-year" id="calendarMonthYear"></div>
+                            <button onclick="calendarNextMonth()">Następny &rarr;</button>
+                        </div>
+                        <div class="calendar-grid" id="calendarGrid"></div>
+                    </div>
+
+                    <!-- Day Details Panel -->
+                    <div class="day-details-panel" id="dayDetailsPanel">
+                        <div class="day-details-header">
+                            <h3 id="selectedDayTitle"></h3>
+                            <p id="selectedDayDate"></p>
+                        </div>
+
+                        <div class="employee-filter">
+                            <label for="employeeFilter">Filtruj po pracowniku:</label>
+                            <select id="employeeFilter" onchange="updateDayAppointmentsDisplay()">
+                                <option value="">Wszyscy pracownicy</option>
+                                <option value="Natalia Gąsiorowska">Natalia Gąsiorowska</option>
+                                <option value="Julian Reed">Julian Reed</option>
+                                <option value="Maya Chen">Maya Chen</option>
+                            </select>
+                        </div>
+
+                        <div class="appointments-list" id="dayAppointmentsList">
+                            <div class="no-appointments">Brak wizyt w wybranym dniu</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Selected Appointment Details -->
+                <div class="appointment-details-card" id="appointmentDetailsCard">
+                    <h3 id="detailsClientName"></h3>
+                    <div class="appointment-detail-row">
+                        <span class="appointment-detail-label">Czas:</span>
+                        <span class="appointment-detail-value" id="detailsTime"></span>
+                    </div>
+                    <div class="appointment-detail-row">
+                        <span class="appointment-detail-label">Usługa:</span>
+                        <span class="appointment-detail-value" id="detailsService"></span>
+                    </div>
+                    <div class="appointment-detail-row">
+                        <span class="appointment-detail-label">Status:</span>
+                        <span class="appointment-detail-value" id="detailsStatus"></span>
+                    </div>
+                    <div class="artist-assignment">
+                        <label for="calendarArtistSelect">Przydziel osobę:</label>
+                        <select id="calendarArtistSelect">
+                            <option value="">Bez przydzielenia</option>
+                            <option value="Natalia Gąsiorowska">Natalia Gąsiorowska</option>
+                            <option value="Julian Reed">Julian Reed</option>
+                            <option value="Maya Chen">Maya Chen</option>
+                        </select>
+                        <button onclick="saveCalendarArtistAssignment()">Przydziel</button>
+                    </div>
+                </div>
+
+                <h3 style="margin-top: 2rem; margin-bottom: 1rem;">Dodaj nową wizytę</h3>
                 <form id="addAppointmentForm" class="appointment-form">
                     <div class="field-group">
                         <input type="text" id="clientName" placeholder="Imie klienta" required>
@@ -776,9 +1133,18 @@
                         <input type="text" id="appointmentStatus" placeholder="Status" value="NEW" required>
                         <small id="appointmentStatusError" class="field-error"></small>
                     </div>
+                    <div class="field-group">
+                        <select id="appointmentArtist">
+                            <option value="">Bez przydzielenia</option>
+                            <option value="Natalia Gąsiorowska">Natalia Gąsiorowska</option>
+                            <option value="Julian Reed">Julian Reed</option>
+                            <option value="Maya Chen">Maya Chen</option>
+                        </select>
+                    </div>
                     <button type="submit">Dodaj wizyte</button>
                 </form>
 
+                <h3 style="margin-top: 2rem; margin-bottom: 1rem;">Wszystkie wizyty</h3>
                 <table id="appointmentsTable">
                     <thead>
                         <tr>
@@ -936,6 +1302,12 @@
             <small id="editAppointmentServiceError" class="field-error"></small>
             <input type="text" id="editAppointmentStatus" placeholder="Status" required>
             <small id="editAppointmentStatusError" class="field-error"></small>
+            <select id="editAppointmentArtist">
+                <option value="">Bez przydzielenia</option>
+                <option value="Natalia Gąsiorowska">Natalia Gąsiorowska</option>
+                <option value="Julian Reed">Julian Reed</option>
+                <option value="Maya Chen">Maya Chen</option>
+            </select>
             <button type="submit">Zaktualizuj</button>
         </form>
     </div>
@@ -1086,6 +1458,11 @@
         return canManageServices();
     }
 
+    function canAccessCustomerBooking() {
+        const role = getCurrentRole();
+        return role === 'CUSTOMER' || role === 'OWNER' || role === 'ADMIN';
+    }
+
     function formatServiceCategory(category) {
         if (category === 'LASHES') {
             return 'Lashes';
@@ -1098,10 +1475,15 @@
 
     function updateTopNavigationUI() {
         const topAuthButton = document.querySelector('#topAuthButton');
+        const bookingButton = document.querySelector('#navBookingButton');
         const stuffButton = document.querySelector('#navStuffButton');
         const organizationButton = document.querySelector('#navOrganizationButton');
         if (topAuthButton) {
             topAuthButton.textContent = isLoggedIn() ? 'Wyloguj' : 'Logowanie';
+        }
+
+        if (bookingButton) {
+            bookingButton.style.display = canAccessCustomerBooking() ? 'inline-flex' : 'none';
         }
 
         if (stuffButton) {
@@ -1461,9 +1843,265 @@
                 <td>${new Date(a.appointmentTime).toLocaleString()}</td>
                 <td>${a.service ? a.service.name : 'Brak'}</td>
                 <td>${a.status}</td>
-                <td>${canAppointments ? `<button type="button" class="edit-appointment-btn" data-id="${a.id}" data-client="${a.clientName}" data-time="${a.appointmentTime}" data-service="${a.service?.id || ''}" data-status="${a.status}" style="background: #ffc107; color: black; border: none; padding: 5px 10px; cursor: pointer; border-radius: 3px; margin-right: 5px;">Edytuj</button><button type="button" class="delete-btn" data-id="${a.id}" style="background: #dc3545; color: white; border: none; padding: 5px 10px; cursor: pointer; border-radius: 3px;">Usuń</button>` : ''}</td>
+                <td>${canAppointments ? `<button type="button" class="edit-appointment-btn" data-id="${a.id}" data-client="${a.clientName}" data-time="${a.appointmentTime}" data-service="${a.service?.id || ''}" data-status="${a.status}" data-artist="${a.artist || ''}" style="background: #ffc107; color: black; border: none; padding: 5px 10px; cursor: pointer; border-radius: 3px; margin-right: 5px;">Edytuj</button><button type="button" class="delete-btn" data-id="${a.id}" style="background: #dc3545; color: white; border: none; padding: 5px 10px; cursor: pointer; border-radius: 3px;">Usuń</button>` : ''}</td>
             </tr>
         `).join('');
+        
+        // Render calendar with appointments
+        renderCalendar(apps);
+
+        // Initialize calendar to show today's appointments
+        setTimeout(() => {
+            const today = new Date();
+            const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+            const todayAppointments = window.allAppointments.filter(app => {
+                const appDate = new Date(app.appointmentTime);
+                const appDateStr = `${appDate.getFullYear()}-${String(appDate.getMonth() + 1).padStart(2, '0')}-${String(appDate.getDate()).padStart(2, '0')}`;
+                return appDateStr === todayStr;
+            });
+            selectCalendarDay(todayStr, today.getDate(), today.getMonth(), today.getFullYear(), todayAppointments);
+        }, 100);
+    }
+
+    // ===== Calendar Functions =====
+    let currentCalendarDate = new Date();
+    let selectedCalendarAppointment = null;
+    window.allAppointments = [];
+
+    function formatLocalDateKey(value) {
+        const date = new Date(value);
+        return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+    }
+
+    function renderCalendar(appointments) {
+        window.allAppointments = appointments;
+        const grid = document.querySelector('#calendarGrid');
+        const monthYearEl = document.querySelector('#calendarMonthYear');
+        
+        if (!grid) return;
+
+        grid.innerHTML = '';
+
+        // Day headers
+        const dayNames = ['Pon', 'Wto', 'Śro', 'Czw', 'Pią', 'Sob', 'Nie'];
+        dayNames.forEach(day => {
+            const header = document.createElement('div');
+            header.className = 'calendar-day-header';
+            header.textContent = day;
+            grid.appendChild(header);
+        });
+
+        const monthNames = ['Styczeń', 'Luty', 'Marzec', 'Kwiecień', 'Maj', 'Czerwiec', 'Lipiec', 'Sierpień', 'Wrzesień', 'Październik', 'Listopad', 'Grudzień'];
+        monthYearEl.textContent = `${monthNames[currentCalendarDate.getMonth()]} ${currentCalendarDate.getFullYear()}`;
+
+        const year = currentCalendarDate.getFullYear();
+        const month = currentCalendarDate.getMonth();
+        const firstDay = new Date(year, month, 1).getDay();
+        const lastDay = new Date(year, month + 1, 0).getDate();
+        const prevLastDay = new Date(year, month, 0).getDate();
+
+        // Previous month days
+        for (let i = firstDay === 0 ? 6 : firstDay - 1; i > 0; i--) {
+            const dayEl = document.createElement('div');
+            dayEl.className = 'calendar-day other-month';
+            dayEl.innerHTML = `<div class="calendar-day-number">${prevLastDay - i + 1}</div>`;
+            grid.appendChild(dayEl);
+        }
+
+        // Current month days
+        const today = new Date();
+        const todayDateStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+
+        for (let day = 1; day <= lastDay; day++) {
+            const dayEl = document.createElement('div');
+            dayEl.className = 'calendar-day';
+
+            const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+            
+            if (dateStr === todayDateStr) {
+                dayEl.classList.add('today');
+            }
+
+            const dayNumber = document.createElement('div');
+            dayNumber.className = 'calendar-day-number';
+            dayNumber.textContent = day;
+            dayEl.appendChild(dayNumber);
+
+            // Add appointments for this day
+            const dayAppointments = appointments.filter(app => {
+                const appDate = formatLocalDateKey(app.appointmentTime);
+                return appDate === dateStr;
+            });
+
+            dayAppointments.forEach(app => {
+                const appEl = document.createElement('div');
+                appEl.className = 'calendar-appointment-item';
+                appEl.textContent = app.clientName;
+                appEl.onclick = (e) => {
+                    e.stopPropagation();
+                    showCalendarAppointmentDetails(app);
+                };
+                dayEl.appendChild(appEl);
+            });
+
+            // Add click handler to select day
+            dayEl.onclick = () => selectCalendarDay(dateStr, day, month, year, dayAppointments);
+
+            grid.appendChild(dayEl);
+        }
+
+        // Next month days
+        const totalCells = grid.querySelectorAll('.calendar-day, .calendar-day-header').length - dayNames.length;
+        const remainingCells = 42 - totalCells;
+        for (let day = 1; day <= remainingCells; day++) {
+            const dayEl = document.createElement('div');
+            dayEl.className = 'calendar-day other-month';
+            dayEl.innerHTML = `<div class="calendar-day-number">${day}</div>`;
+            grid.appendChild(dayEl);
+        }
+    }
+
+    let selectedDayData = null;
+
+    function selectCalendarDay(dateStr, day, month, year, dayAppointments) {
+        selectedDayData = {
+            dateStr,
+            day,
+            month,
+            year,
+            appointments: dayAppointments
+        };
+
+        // Remove previous selection
+        document.querySelectorAll('.calendar-day.selected').forEach(el => {
+            el.classList.remove('selected');
+        });
+
+        // Mark day as selected
+        const dayElements = document.querySelectorAll('.calendar-day');
+        dayElements.forEach(el => {
+            const dayNum = el.querySelector('.calendar-day-number');
+            if (dayNum && dayNum.textContent === String(day) && !el.classList.contains('other-month')) {
+                el.classList.add('selected');
+            }
+        });
+
+        // Show day details panel
+        const detailsPanel = document.querySelector('#dayDetailsPanel');
+        detailsPanel.classList.add('show');
+
+        // Update day details header
+        const monthNames = ['Styczeń', 'Luty', 'Marzec', 'Kwiecień', 'Maj', 'Czerwiec', 'Lipiec', 'Sierpień', 'Wrzesień', 'Październik', 'Listopad', 'Grudzień'];
+        const dayNames = ['Niedziela', 'Poniedziałek', 'Wtorek', 'Środa', 'Czwartek', 'Piątek', 'Sobota'];
+        const date = new Date(year, month, day);
+        
+        document.querySelector('#selectedDayTitle').textContent = `${dayNames[date.getDay()]}, ${day} ${monthNames[month]}`;
+        document.querySelector('#selectedDayDate').textContent = dateStr;
+
+        // Reset employee filter and display appointments
+        document.querySelector('#employeeFilter').value = '';
+        updateDayAppointmentsDisplay();
+    }
+
+    function updateDayAppointmentsDisplay() {
+        if (!selectedDayData) return;
+
+        const filterValue = document.querySelector('#employeeFilter').value;
+        let filteredAppointments = selectedDayData.appointments;
+
+        // Filter by employee if selected
+        if (filterValue) {
+            filteredAppointments = filteredAppointments.filter(app => app.artist === filterValue);
+        }
+
+        // Display appointments
+        const appointmentsList = document.querySelector('#dayAppointmentsList');
+        
+        if (filteredAppointments.length === 0) {
+            appointmentsList.innerHTML = '<div class="no-appointments">Brak wizyt w wybranym dniu</div>';
+            return;
+        }
+
+        appointmentsList.innerHTML = filteredAppointments.map(app => `
+            <div class="appointment-card">
+                <h4>${app.clientName}</h4>
+                <p><strong>Czas:</strong> ${new Date(app.appointmentTime).toLocaleTimeString('pl-PL', { hour: '2-digit', minute: '2-digit' })}</p>
+                <p><strong>Usługa:</strong> ${app.service ? app.service.name : 'Brak usługi'}</p>
+                ${app.artist ? `<p><strong>Pracownik:</strong> ${app.artist}</p>` : ''}
+                <p><strong>Status:</strong> ${app.status}</p>
+            </div>
+        `).join('');
+    }
+
+    function calendarPreviousMonth() {
+        currentCalendarDate.setMonth(currentCalendarDate.getMonth() - 1);
+        renderCalendar(window.allAppointments);
+    }
+
+    function calendarNextMonth() {
+        currentCalendarDate.setMonth(currentCalendarDate.getMonth() + 1);
+        renderCalendar(window.allAppointments);
+    }
+
+    function showCalendarAppointmentDetails(appointment) {
+        selectedCalendarAppointment = appointment;
+        const card = document.querySelector('#appointmentDetailsCard');
+        
+        document.querySelector('#detailsClientName').textContent = appointment.clientName;
+        document.querySelector('#detailsTime').textContent = new Date(appointment.appointmentTime).toLocaleString('pl-PL');
+        document.querySelector('#detailsService').textContent = appointment.service ? appointment.service.name : 'Brak usługi';
+        document.querySelector('#detailsStatus').textContent = appointment.status;
+        document.querySelector('#calendarArtistSelect').value = appointment.artist || '';
+        
+        card.classList.add('show');
+    }
+
+    async function saveCalendarArtistAssignment() {
+        if (!selectedCalendarAppointment) {
+            alert('Nie wybrano wizyty');
+            return;
+        }
+
+        if (!canManageAppointments()) {
+            alert('Brak uprawnień do przydzielania pracownika.');
+            return;
+        }
+
+        const artist = document.querySelector('#calendarArtistSelect').value.trim();
+        const authHeaders = getAuthHeader();
+        const response = await fetch(`http://localhost:8081/api/appointments/${selectedCalendarAppointment.id}`, {
+            method: 'PATCH',
+            headers: {
+                'Content-Type': 'application/json',
+                ...authHeaders
+            },
+            body: JSON.stringify({
+                clientName: selectedCalendarAppointment.clientName,
+                appointmentTime: selectedCalendarAppointment.appointmentTime,
+                status: selectedCalendarAppointment.status,
+                serviceId: selectedCalendarAppointment.service?.id,
+                artist
+            })
+        });
+
+        if (!response.ok) {
+            if (await handleAuthResponse(response)) {
+                return;
+            }
+
+            const errorBody = await parseErrorResponse(response);
+            if (response.status === 400 && errorBody?.errors) {
+                alert(Object.values(errorBody.errors).join('\n'));
+                return;
+            }
+
+            alert('Nie udało się zapisać przydziału pracownika.');
+            return;
+        }
+
+        selectedCalendarAppointment.artist = artist || null;
+        alert(`Przydzielono: ${artist || 'brak przydzielenia'} do wizyty klienta ${selectedCalendarAppointment.clientName}`);
+        await loadData();
     }
 
     // ===== Modal Functions =====
@@ -1918,6 +2556,7 @@
         const appointmentTime = document.querySelector('#appointmentTime').value;
         const serviceId = Number(document.querySelector('#appointmentService').value);
         const status = document.querySelector('#appointmentStatus').value.trim();
+        const artist = document.querySelector('#appointmentArtist').value.trim();
 
         if (!clientName || !appointmentTime || Number.isNaN(serviceId) || !status) {
             alert('Uzupełnij poprawnie wszystkie pola wizyty.');
@@ -1935,7 +2574,8 @@
                 clientName,
                 appointmentTime,
                 status,
-                serviceId
+                serviceId,
+                artist
             })
         });
 
@@ -1955,6 +2595,7 @@
 
         event.target.reset();
         document.querySelector('#appointmentStatus').value = 'NEW';
+        document.querySelector('#appointmentArtist').value = '';
         loadData();
     });
 
@@ -1975,12 +2616,14 @@
         const appointmentTime = editBtn.dataset.time;
         const serviceId = editBtn.dataset.service;
         const status = editBtn.dataset.status;
+        const artist = editBtn.dataset.artist || '';
 
         document.querySelector('#editAppointmentId').value = id;
         document.querySelector('#editClientName').value = clientName;
         document.querySelector('#editAppointmentTime').value = appointmentTime;
         document.querySelector('#editAppointmentService').value = serviceId;
         document.querySelector('#editAppointmentStatus').value = status;
+        document.querySelector('#editAppointmentArtist').value = artist;
 
         document.querySelector('#editAppointmentModal').classList.add('show');
     });
@@ -2007,6 +2650,7 @@
         const appointmentTime = document.querySelector('#editAppointmentTime').value;
         const serviceId = Number(document.querySelector('#editAppointmentService').value);
         const status = document.querySelector('#editAppointmentStatus').value.trim();
+        const artist = document.querySelector('#editAppointmentArtist').value.trim();
 
         if (!clientName || !appointmentTime || Number.isNaN(serviceId) || !status) {
             alert('Uzupełnij poprawnie wszystkie pola wizyty.');
@@ -2024,7 +2668,8 @@
                 clientName,
                 appointmentTime,
                 status,
-                serviceId
+                serviceId,
+                artist
             })
         });
 
@@ -2102,6 +2747,17 @@
 
     // ===== Initialize =====
     checkAuthStatus();
+
+    // Handle view parameter from booking.html navigation
+    const urlParams = new URLSearchParams(window.location.search);
+    const viewParam = urlParams.get('view');
+    if (viewParam === 'stuff' || viewParam === 'organization') {
+        setTimeout(() => {
+            openRoleMarketingView(viewParam);
+        }, 100);
+        // Clean up URL
+        window.history.replaceState({}, document.title, window.location.pathname);
+    }
 </script>
 
 </body>
