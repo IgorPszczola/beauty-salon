@@ -352,9 +352,11 @@
         <button class="brand" onclick="window.location.href='index.html'">BeeNails</button>
         <nav class="nav-center" aria-label="Primary">
             <a class="active" href="services.html">Services</a>
-            <a href="index.html#gallerySection">Gallery</a>
+            <a href="lookbook.html">Gallery</a>
             <a href="index.html#aboutSection">About</a>
             <a href="index.html#reviewsSection">Reviews</a>
+            <button type="button" id="navStuffButton" style="display: none; border: 0; background: transparent; color: inherit; cursor: pointer; font-family: inherit; font-size: inherit; padding: 0;" onclick="navigateToSection('stuff')">Stuff</button>
+            <button type="button" id="navOrganizationButton" style="display: none; border: 0; background: transparent; color: inherit; cursor: pointer; font-family: inherit; font-size: inherit; padding: 0;" onclick="navigateToSection('organization')">Organization</button>
         </nav>
         <a class="hero-btn" href="index.html">Back To Main</a>
     </div>
@@ -568,6 +570,50 @@
             }
         });
     });
+
+    // Helper functions for admin navigation
+    function canManageAppointments() {
+        const credentials = localStorage.getItem('auth_credentials');
+        if (!credentials) return false;
+        try {
+            const decoded = atob(credentials);
+            const [username] = decoded.split(':');
+            return ['admin', 'staff', 'owner'].includes(username.toLowerCase());
+        } catch {
+            return false;
+        }
+    }
+
+    function canManageServices() {
+        const credentials = localStorage.getItem('auth_credentials');
+        if (!credentials) return false;
+        try {
+            const decoded = atob(credentials);
+            const [username] = decoded.split(':');
+            return ['admin', 'owner'].includes(username.toLowerCase());
+        } catch {
+            return false;
+        }
+    }
+
+    function updateServicesNavUI() {
+        const stuffButton = document.querySelector('#navStuffButton');
+        const organizationButton = document.querySelector('#navOrganizationButton');
+
+        if (stuffButton) {
+            stuffButton.style.display = canManageAppointments() ? 'inline-block' : 'none';
+        }
+        if (organizationButton) {
+            organizationButton.style.display = canManageServices() ? 'inline-block' : 'none';
+        }
+    }
+
+    function navigateToSection(section) {
+        window.location.href = `index.html#${section === 'stuff' ? 'stuffSection' : 'organizationSection'}`;
+    }
+
+    // Update nav on page load
+    updateServicesNavUI();
 
 </script>
 </body>
