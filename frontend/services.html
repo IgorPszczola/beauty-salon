@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BeeNails | Services</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif:ital,wght@0,400;0,600;1,400;1,600&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --surface: #fdf9f6;
+            --surface-low: #f7f3f0;
+            --surface-card: #ffffff;
+            --surface-panel: #f1edea;
+            --text: #1c1b1a;
+            --text-soft: #4f4443;
+            --primary: #735855;
+            --primary-soft: #e8c5c1;
+            --outline: rgba(129, 116, 114, 0.2);
+            --radius-lg: 1rem;
+            --radius-xl: 1.5rem;
+            --shadow-ambient: 0 20px 40px rgba(28, 27, 26, 0.06);
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            font-family: "Manrope", sans-serif;
+            color: var(--text);
+            background:
+                radial-gradient(980px 500px at 84% 8%, rgba(232, 197, 193, 0.28), transparent 62%),
+                radial-gradient(860px 430px at 8% 42%, rgba(215, 231, 213, 0.2), transparent 64%),
+                var(--surface);
+        }
+
+        h1, h2, h3 { margin: 0; font-family: "Noto Serif", serif; font-weight: 600; }
+        p { margin: 0; }
+
+        .top-nav {
+            position: sticky;
+            top: 0;
+            z-index: 40;
+            backdrop-filter: blur(20px);
+            background: rgba(253, 249, 246, 0.82);
+        }
+
+        .nav-inner,
+        .page-wrap,
+        .footer-wrap {
+            width: min(1180px, 92vw);
+            margin: 0 auto;
+        }
+
+        .nav-inner {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            padding: 1rem 0;
+        }
+
+        .brand {
+            border: 0;
+            background: transparent;
+            color: var(--text);
+            cursor: pointer;
+            font-family: "Noto Serif", serif;
+            font-style: italic;
+            font-size: 1.45rem;
+            padding: 0;
+        }
+
+        .nav-center {
+            display: none;
+            gap: 1rem;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .nav-center a {
+            color: var(--text-soft);
+            text-decoration: none;
+            font-family: "Noto Serif", serif;
+            font-size: 0.95rem;
+            border-bottom: 1px solid transparent;
+            transition: color 0.15s ease, border-color 0.15s ease;
+            padding-bottom: 0.1rem;
+        }
+
+        .nav-center a.active,
+        .nav-center a:hover {
+            color: var(--text);
+            border-color: rgba(129, 116, 114, 0.45);
+        }
+
+        .hero-btn {
+            border: 0;
+            border-radius: 999px;
+            padding: 0.62rem 1.1rem;
+            cursor: pointer;
+            font-family: "Manrope", sans-serif;
+            font-size: 0.8rem;
+            font-weight: 600;
+            letter-spacing: 0.03em;
+            text-transform: uppercase;
+            color: #fff;
+            background: linear-gradient(135deg, var(--primary), var(--primary-soft));
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: opacity 0.15s ease, transform 0.15s ease;
+        }
+
+        .hero-btn:hover {
+            opacity: 0.92;
+            transform: translateY(-1px);
+        }
+
+        .page-wrap {
+            padding: 2.4rem 0 4rem;
+        }
+
+        .services-hero {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1.9rem;
+            margin-bottom: 3rem;
+            align-items: end;
+        }
+
+        .hero-content {
+            background: transparent;
+            padding: 1.4rem 0;
+        }
+
+        .eyebrow {
+            display: inline-block;
+            text-transform: uppercase;
+            letter-spacing: 0.2em;
+            font-size: 0.72rem;
+            color: var(--text-soft);
+            margin-bottom: 0.8rem;
+        }
+
+        .hero-title {
+            font-size: clamp(2.2rem, 7.4vw, 5.3rem);
+            line-height: 1.02;
+            max-width: 11ch;
+            margin-bottom: 1.35rem;
+        }
+
+        .hero-title span {
+            display: block;
+        }
+
+        .hero-copy {
+            max-width: 58ch;
+            color: var(--text-soft);
+            line-height: 1.75;
+            font-size: 1.03rem;
+        }
+
+        .hero-image {
+            width: min(100%, 440px);
+            border-radius: var(--radius-xl);
+            object-fit: cover;
+            min-height: 260px;
+            max-height: 430px;
+            box-shadow: none;
+            justify-self: end;
+        }
+
+        .services-shell {
+            background: transparent;
+            border-radius: 0;
+            padding: 0;
+            display: grid;
+            grid-template-columns: 120px 1fr;
+            gap: 2rem;
+            align-items: start;
+        }
+
+        .category-nav {
+            display: flex;
+            flex-direction: column;
+            gap: 1.2rem;
+            position: sticky;
+            top: 100px;
+        }
+
+        .category-nav-item {
+            border: 0;
+            background: transparent;
+            color: var(--text-soft);
+            cursor: pointer;
+            font-family: "Noto Serif", serif;
+            font-size: 1.5rem;
+            padding: 0.5rem 0;
+            text-align: left;
+            transition: color 0.15s ease;
+        }
+
+        .category-nav-item:hover,
+        .category-nav-item.active {
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        .services-head {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: end;
+            gap: 0.8rem;
+            margin-bottom: 1rem;
+            grid-column: 2;
+        }
+
+        .services-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 0.9rem;
+        }
+
+        .category-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1.9rem;
+            grid-column: 2;
+        }
+
+        .category-section {
+            display: flex;
+            flex-direction: column;
+            gap: 0.9rem;
+        }
+
+        .category-heading {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+        }
+
+        .category-heading h3 {
+            font-size: clamp(1.5rem, 3.2vw, 2.2rem);
+            font-style: italic;
+            font-weight: 500;
+        }
+
+        .category-divider {
+            height: 1px;
+            background: rgba(129, 116, 114, 0.2);
+            flex: 1;
+        }
+
+        .service-card {
+            background: var(--surface-card);
+            border-radius: var(--radius-lg);
+            padding: 1rem;
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 0.7rem;
+        }
+
+        .service-top {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: baseline;
+            gap: 0.6rem;
+        }
+
+        .service-name {
+            font-size: 1.15rem;
+        }
+
+        .service-price {
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .service-meta {
+            color: var(--text-soft);
+            font-size: 0.9rem;
+        }
+
+        .service-description {
+            color: var(--text-soft);
+            line-height: 1.45;
+            font-size: 0.95rem;
+        }
+
+        .status-box {
+            background: var(--surface-card);
+            border-radius: var(--radius-lg);
+            padding: 1rem;
+            color: var(--text-soft);
+        }
+
+        .footer-wrap {
+            padding: 1.3rem 0 2rem;
+            color: var(--text-soft);
+            font-size: 0.84rem;
+        }
+
+        @media (min-width: 920px) {
+            .nav-center { display: flex; }
+            .services-hero {
+                grid-template-columns: 1.05fr 0.95fr;
+                gap: 2.2rem;
+            }
+            .hero-content { padding: 1.8rem 0; }
+            .service-card {
+                grid-template-columns: 1fr auto;
+                align-items: center;
+                gap: 1rem;
+            }
+            .service-main {
+                min-width: 0;
+            }
+        }
+
+        @media (max-width: 919px) {
+            .services-shell {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+            .category-nav {
+                display: flex;
+                flex-direction: row;
+                gap: 1rem;
+                margin-bottom: 1.5rem;
+                position: static;
+                flex-wrap: wrap;
+                order: -1;
+            }
+            .services-head {
+                grid-column: 1 !important;
+            }
+            .category-list {
+                grid-column: 1 !important;
+            }
+        }
+    </style>
+</head>
+<body>
+<header class="top-nav">
+    <div class="nav-inner">
+        <button class="brand" onclick="window.location.href='index.html'">BeeNails</button>
+        <nav class="nav-center" aria-label="Primary">
+            <a class="active" href="services.html">Services</a>
+            <a href="index.html#gallerySection">Gallery</a>
+            <a href="index.html#aboutSection">About</a>
+            <a href="index.html#reviewsSection">Reviews</a>
+        </nav>
+        <a class="hero-btn" href="index.html">Back To Main</a>
+    </div>
+</header>
+
+<main class="page-wrap">
+    <section class="services-hero">
+        <div class="hero-content">
+            <span class="eyebrow">The Menu</span>
+            <h1 class="hero-title">
+                <span>Curated</span>
+                <span style="font-style: italic;">Treatments</span>
+            </h1>
+            <p class="hero-copy">
+                Pelne menu BeeNails. Tutaj znajdziesz wszystkie uslugi dostepne w salonie,
+                pobierane bezposrednio z systemu rezerwacji.
+            </p>
+        </div>
+        <img class="hero-image" src="../src/assets/main_page.png" alt="Oferta uslug BeeNails">
+    </section>
+
+    <section class="services-shell" aria-labelledby="allServicesHeading">
+        <nav class="category-nav" aria-label="Category navigation">
+            <button class="category-nav-item" data-category="nails">Nails</button>
+            <button class="category-nav-item" data-category="lashes">Lashes</button>
+            <button class="category-nav-item" data-category="skin">Skin</button>
+        </nav>
+
+        <div>
+            <div class="services-head">
+                <div>
+                    <h2 id="allServicesHeading">All Services</h2>
+                </div>
+            </div>
+
+            <div id="servicesState" class="status-box">Ladowanie uslug...</div>
+            <div id="servicesGrid" class="category-list" style="display: none;"></div>
+        </div>
+    </section>
+</main>
+
+<footer class="footer-wrap">BeeNails | Services Menu</footer>
+
+<script>
+    function formatPrice(value) {
+        const numberValue = Number(value);
+        if (Number.isNaN(numberValue)) {
+            return '-';
+        }
+        return `${numberValue.toFixed(2)} zl`;
+    }
+
+    function formatDuration(value) {
+        const numberValue = Number(value);
+        if (Number.isNaN(numberValue)) {
+            return '-';
+        }
+        return `${numberValue} min`;
+    }
+
+    function formatServiceCategory(category) {
+        if (category === 'LASHES') {
+            return 'Lashes';
+        }
+        if (category === 'SKIN') {
+            return 'Skin';
+        }
+        return 'Nails';
+    }
+
+    function sortServicesByCategoryAndName(services) {
+        const categoryOrder = {
+            NAILS: 0,
+            LASHES: 1,
+            SKIN: 2
+        };
+
+        return [...services].sort((left, right) => {
+            const leftCategory = categoryOrder[left.category] ?? 99;
+            const rightCategory = categoryOrder[right.category] ?? 99;
+            if (leftCategory !== rightCategory) {
+                return leftCategory - rightCategory;
+            }
+            return String(left.name || '').localeCompare(String(right.name || ''));
+        });
+    }
+
+    function renderServices(services) {
+        const stateNode = document.querySelector('#servicesState');
+        const gridNode = document.querySelector('#servicesGrid');
+
+        if (!services.length) {
+            stateNode.textContent = 'Brak uslug w systemie.';
+            stateNode.style.display = 'block';
+            gridNode.style.display = 'none';
+            gridNode.innerHTML = '';
+            return;
+        }
+
+        const sorted = sortServicesByCategoryAndName(services);
+        const grouped = {
+            NAILS: [],
+            LASHES: [],
+            SKIN: []
+        };
+
+        sorted.forEach(service => {
+            const normalizedCategory = service.category || 'NAILS';
+            if (!grouped[normalizedCategory]) {
+                grouped[normalizedCategory] = [];
+            }
+            grouped[normalizedCategory].push(service);
+        });
+
+        const categoryMarkup = ['NAILS', 'LASHES', 'SKIN']
+            .filter(category => grouped[category] && grouped[category].length)
+            .map(category => {
+                const cards = grouped[category].map(service => {
+                    const description = service.description && service.description.trim()
+                        ? service.description
+                        : 'Opis uslugi zostanie uzupelniony podczas konsultacji.';
+
+                    return `
+                        <article class="service-card">
+                            <div class="service-main">
+                                <div class="service-top">
+                                    <h3 class="service-name">${service.name || 'Usluga'}</h3>
+                                    <span class="service-price">${formatPrice(service.price)}</span>
+                                </div>
+                                <p class="service-description">${description}</p>
+                            </div>
+                        </article>
+                    `;
+                }).join('');
+
+                return `
+                    <section class="category-section" id="category-${category.toLowerCase()}">
+                        <div class="category-heading">
+                            <h3>${formatServiceCategory(category)}</h3>
+                            <div class="category-divider"></div>
+                        </div>
+                        <div class="services-grid">${cards}</div>
+                    </section>
+                `;
+            }).join('');
+
+        gridNode.innerHTML = categoryMarkup;
+
+        stateNode.style.display = 'none';
+        gridNode.style.display = 'flex';
+    }
+
+    async function loadAllServices() {
+        const stateNode = document.querySelector('#servicesState');
+
+        try {
+            const response = await fetch('http://localhost:8081/api/services');
+            if (!response.ok) {
+                stateNode.textContent = 'Nie udalo sie pobrac uslug. Sprobuj odswiezyc strone.';
+                return;
+            }
+
+            const services = await response.json();
+            renderServices(Array.isArray(services) ? services : []);
+        } catch (error) {
+            stateNode.textContent = 'Brak polaczenia z API. Uruchom backend i odswiez strone.';
+        }
+    }
+
+    loadAllServices();
+
+    // Category navigation smooth scroll
+    document.querySelectorAll('.category-nav-item').forEach(button => {
+        button.addEventListener('click', (e) => {
+            const category = e.target.dataset.category;
+            const targetElement = document.getElementById(`category-${category}`);
+            
+            if (targetElement) {
+                // Remove active class from all buttons
+                document.querySelectorAll('.category-nav-item').forEach(btn => {
+                    btn.classList.remove('active');
+                });
+                
+                // Add active class to clicked button
+                e.target.classList.add('active');
+                
+                // Smooth scroll to target
+                targetElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        });
+    });
+
+    // Set active category on page load and scroll
+    window.addEventListener('scroll', () => {
+        const categories = ['nails', 'lashes', 'skin'];
+        const scrollPosition = window.scrollY + 150;
+
+        categories.forEach(category => {
+            const element = document.getElementById(`category-${category}`);
+            if (element) {
+                const { top, bottom } = element.getBoundingClientRect();
+                const elementTop = top + window.scrollY;
+                
+                if (scrollPosition >= elementTop && scrollPosition < elementTop + element.offsetHeight) {
+                    document.querySelectorAll('.category-nav-item').forEach(btn => {
+                        btn.classList.remove('active');
+                    });
+                    const activeBtn = document.querySelector(`[data-category="${category}"]`);
+                    if (activeBtn) activeBtn.classList.add('active');
+                }
+            }
+        });
+    });
+
+</script>
+</body>
+</html>

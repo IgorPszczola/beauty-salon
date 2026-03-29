@@ -605,7 +605,7 @@
     <div class="nav-inner">
         <button class="brand brand-btn" onclick="showMarketingSection()">BeeNails</button>
         <div class="nav-center">
-            <button type="button" onclick="showMarketingSection('servicesSection')">Services</button>
+            <button type="button" onclick="window.location.href='services.html'">Services</button>
             <button type="button" onclick="showMarketingSection('gallerySection')">Gallery</button>
             <button type="button" onclick="showMarketingSection('aboutSection')">About</button>
             <button type="button" onclick="showMarketingSection('reviewsSection')">Reviews</button>
@@ -808,6 +808,14 @@
                         <small id="serviceNameError" class="field-error"></small>
                     </div>
                     <div class="field-group">
+                        <select id="serviceCategory" required>
+                            <option value="NAILS">Nails</option>
+                            <option value="LASHES">Lashes</option>
+                            <option value="SKIN">Skin</option>
+                        </select>
+                        <small id="serviceCategoryError" class="field-error"></small>
+                    </div>
+                    <div class="field-group">
                         <input type="number" id="servicePrice" placeholder="Cena" min="0" step="0.01" required>
                         <small id="servicePriceError" class="field-error"></small>
                     </div>
@@ -821,7 +829,7 @@
                 <table id="servicesTable">
                     <thead>
                         <tr>
-                            <th>ID</th><th>Nazwa</th><th>Cena</th><th>Czas (min)</th><th id="serviceActionsHeader">Akcje</th>
+                            <th>ID</th><th>Nazwa</th><th>Kategoria</th><th>Cena</th><th>Czas (min)</th><th id="serviceActionsHeader">Akcje</th>
                         </tr>
                     </thead>
                     <tbody></tbody>
@@ -895,6 +903,12 @@
             <input type="hidden" id="editServiceId">
             <input type="text" id="editServiceName" placeholder="Nazwa uslugi" required>
             <small id="editServiceNameError" class="field-error"></small>
+            <select id="editServiceCategory" required>
+                <option value="NAILS">Nails</option>
+                <option value="LASHES">Lashes</option>
+                <option value="SKIN">Skin</option>
+            </select>
+            <small id="editServiceCategoryError" class="field-error"></small>
             <input type="number" id="editServicePrice" placeholder="Cena" min="0" step="0.01" required>
             <small id="editServicePriceError" class="field-error"></small>
             <input type="number" id="editServiceDuration" placeholder="Czas (min)" min="1" step="1" required>
@@ -1070,6 +1084,16 @@
 
     function canAccessOrganizationArea() {
         return canManageServices();
+    }
+
+    function formatServiceCategory(category) {
+        if (category === 'LASHES') {
+            return 'Lashes';
+        }
+        if (category === 'SKIN') {
+            return 'Skin';
+        }
+        return 'Nails';
     }
 
     function updateTopNavigationUI() {
@@ -1413,9 +1437,10 @@
             <tr>
                 <td>${s.id}</td>
                 <td>${s.name}</td>
+                <td>${formatServiceCategory(s.category)}</td>
                 <td>${s.price} zł</td>
                 <td>${s.duration}</td>
-                <td>${canServices || canDeleteService ? `${canServices ? `<button type="button" class="edit-service-btn" data-id="${s.id}" data-name="${s.name}" data-price="${s.price}" data-duration="${s.duration}" style="background: #ffc107; color: black; border: none; padding: 5px 10px; cursor: pointer; border-radius: 3px; margin-right: 5px;">Edytuj</button>` : ''}${canDeleteService ? `<button type="button" class="delete-service-btn" data-id="${s.id}" data-name="${s.name}" style="background: #dc3545; color: white; border: none; padding: 5px 10px; cursor: pointer; border-radius: 3px;">Usuń</button>` : ''}` : ''}</td>
+                <td>${canServices || canDeleteService ? `${canServices ? `<button type="button" class="edit-service-btn" data-id="${s.id}" data-name="${s.name}" data-category="${s.category || 'NAILS'}" data-price="${s.price}" data-duration="${s.duration}" style="background: #ffc107; color: black; border: none; padding: 5px 10px; cursor: pointer; border-radius: 3px; margin-right: 5px;">Edytuj</button>` : ''}${canDeleteService ? `<button type="button" class="delete-service-btn" data-id="${s.id}" data-name="${s.name}" style="background: #dc3545; color: white; border: none; padding: 5px 10px; cursor: pointer; border-radius: 3px;">Usuń</button>` : ''}` : ''}</td>
             </tr>
         `).join('');
         
@@ -1717,16 +1742,18 @@
 
         const serviceErrorMapping = {
             name: { errorId: 'serviceNameError', inputSelector: '#serviceName' },
+            category: { errorId: 'serviceCategoryError', inputSelector: '#serviceCategory' },
             price: { errorId: 'servicePriceError', inputSelector: '#servicePrice' },
             duration: { errorId: 'serviceDurationError', inputSelector: '#serviceDuration' }
         };
         clearFieldErrors(serviceErrorMapping);
 
         const name = document.querySelector('#serviceName').value.trim();
+        const category = document.querySelector('#serviceCategory').value;
         const price = Number(document.querySelector('#servicePrice').value);
         const duration = Number(document.querySelector('#serviceDuration').value);
 
-        if (!name || Number.isNaN(price) || Number.isNaN(duration)) {
+        if (!name || !category || Number.isNaN(price) || Number.isNaN(duration)) {
             alert('Uzupełnij poprawnie wszystkie pola usługi.');
             return;
         }
@@ -1740,6 +1767,7 @@
             },
             body: JSON.stringify({
                 name,
+                category,
                 price,
                 duration,
                 description: ''
@@ -1794,11 +1822,13 @@
 
         const id = editBtn.dataset.id;
         const name = editBtn.dataset.name;
+        const category = editBtn.dataset.category;
         const price = editBtn.dataset.price;
         const duration = editBtn.dataset.duration;
 
         document.querySelector('#editServiceId').value = id;
         document.querySelector('#editServiceName').value = name;
+        document.querySelector('#editServiceCategory').value = category || 'NAILS';
         document.querySelector('#editServicePrice').value = price;
         document.querySelector('#editServiceDuration').value = duration;
 
@@ -1816,6 +1846,7 @@
 
         const serviceErrorMapping = {
             name: { errorId: 'editServiceNameError', inputSelector: '#editServiceName' },
+            category: { errorId: 'editServiceCategoryError', inputSelector: '#editServiceCategory' },
             price: { errorId: 'editServicePriceError', inputSelector: '#editServicePrice' },
             duration: { errorId: 'editServiceDurationError', inputSelector: '#editServiceDuration' }
         };
@@ -1823,10 +1854,11 @@
 
         const id = document.querySelector('#editServiceId').value;
         const name = document.querySelector('#editServiceName').value.trim();
+        const category = document.querySelector('#editServiceCategory').value;
         const price = Number(document.querySelector('#editServicePrice').value);
         const duration = Number(document.querySelector('#editServiceDuration').value);
 
-        if (!name || Number.isNaN(price) || Number.isNaN(duration)) {
+        if (!name || !category || Number.isNaN(price) || Number.isNaN(duration)) {
             alert('Uzupełnij poprawnie wszystkie pola usługi.');
             return;
         }
@@ -1840,6 +1872,7 @@
             },
             body: JSON.stringify({
                 name,
+                category,
                 price,
                 duration,
                 description: ''
