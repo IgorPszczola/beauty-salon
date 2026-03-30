@@ -780,6 +780,8 @@
 
         .field-group { display: flex; flex-direction: column; gap: 0.2rem; min-width: 180px; flex: 1; }
 
+        .appointment-form .button-wrapper { display: flex; flex-direction: column; gap: 0.2rem; min-width: 180px; }
+
         input, select {
             width: 100%;
             min-height: 42px;
@@ -1132,15 +1134,18 @@
                         <input type="text" id="appointmentStatus" placeholder="Status" value="NEW" required>
                         <small id="appointmentStatusError" class="field-error"></small>
                     </div>
-                    <div class="field-group">
+                    <div class="field-group" style="flex: 0.6;">
                         <select id="appointmentArtist">
                             <option value="">Bez przydzielenia</option>
                             <option value="Natalia Gąsiorowska">Natalia Gąsiorowska</option>
                             <option value="Julian Reed">Julian Reed</option>
                             <option value="Maya Chen">Maya Chen</option>
                         </select>
+                        <small class="field-error"></small>
                     </div>
-                    <button type="submit">Dodaj wizyte</button>
+                    <div class="button-wrapper">
+                        <button type="submit">Dodaj wizyte</button>
+                    </div>
                 </form>
 
                 <h3 style="margin-top: 2rem; margin-bottom: 1rem;">Wszystkie wizyty</h3>
