@@ -63,11 +63,25 @@
             background: transparent;
             color: var(--text);
             cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.45rem;
             font-family: "Noto Serif", serif;
             font-style: italic;
             font-size: 1.45rem;
             padding: 0;
             justify-self: start;
+        }
+
+        .brand-logo {
+            width: 1.4rem;
+            height: 1.4rem;
+            object-fit: cover;
+            border-radius: 0.35rem;
+        }
+
+        .brand-label {
+            line-height: 1;
         }
 
         .nav-center {
@@ -421,7 +435,10 @@
 <body>
 <header class="top-nav">
     <div class="nav-inner">
-        <button class="brand" onclick="window.location.href='index.html'">BeeNails</button>
+        <button class="brand" onclick="window.location.href='index.html'">
+            <img class="brand-logo" src="../src/assets/BeeNails.png" alt="BeeNails logo">
+            <span class="brand-label">BeeNails</span>
+        </button>
         <nav class="nav-center" aria-label="Primary">
             <a href="services.html">Services</a>
             <a class="active" href="lookbook.html">Gallery</a>

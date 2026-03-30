@@ -66,9 +66,23 @@
         }
 
         .brand {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.45rem;
             font-family: "Noto Serif", serif;
             font-style: italic;
             font-size: 1.45rem;
+        }
+
+        .brand-logo {
+            width: 1.4rem;
+            height: 1.4rem;
+            object-fit: cover;
+            border-radius: 0.35rem;
+        }
+
+        .brand-label {
+            line-height: 1;
         }
 
         .brand-btn {
@@ -898,7 +912,10 @@
 
 <header class="top-nav">
     <div class="nav-inner">
-        <button class="brand brand-btn" onclick="showMarketingSection()">BeeNails</button>
+        <button class="brand brand-btn" onclick="showMarketingSection()">
+            <img class="brand-logo" src="../src/assets/BeeNails.png" alt="BeeNails logo">
+            <span class="brand-label">BeeNails</span>
+        </button>
         <div class="nav-center">
             <button type="button" onclick="window.location.href='services.html'">Services</button>
             <button type="button" onclick="window.location.href='lookbook.html'">Gallery</button>
