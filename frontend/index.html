@@ -2,234 +2,1502 @@
 <html lang="pl">
 <head>
     <meta charset="UTF-8">
-    <title>Salon Beauty - Panel Rezerwacji</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BeeNails | Salon Beauty</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif:ital,wght@0,400;0,600;1,400;1,600&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
     <style>
-        body { font-family: sans-serif; margin: 40px; background: #f4f4f4; }
-        .container { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-        h1 { color: #d63384; }
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        th, td { padding: 12px; border: 1px solid #ddd; text-align: left; }
-        th { background: #d63384; color: white; }
-        .refresh-btn { background: #d63384; color: white; border: none; padding: 10px 20px; cursor: pointer; border-radius: 5px; }
-        .service-form { margin-top: 16px; display: flex; gap: 10px; flex-wrap: wrap; }
-        .service-form input, .appointment-form input, .appointment-form select { padding: 8px; border: 1px solid #ccc; border-radius: 5px; }
-        .service-form button { background: #198754; color: white; border: none; padding: 8px 14px; cursor: pointer; border-radius: 5px; }
-        .appointment-form { margin-top: 16px; display: flex; gap: 10px; flex-wrap: wrap; }
-        .appointment-form button { background: #0d6efd; color: white; border: none; padding: 8px 14px; cursor: pointer; border-radius: 5px; }
-        .field-group { display: flex; flex-direction: column; gap: 4px; }
-        .field-error { min-height: 16px; color: #dc3545; font-size: 12px; }
-        .invalid-field { border-color: #dc3545 !important; outline: none; }
-        .service-form input:invalid,
-        .appointment-form input:invalid,
-        .appointment-form select:invalid {
-            border-color: #dc3545 !important;
-            box-shadow: 0 0 0 1px #dc3545;
+        :root {
+            --surface: #fdf9f6;
+            --surface-low: #f7f3f0;
+            --surface-card: #ffffff;
+            --surface-panel: #f1edea;
+            --text: #1c1b1a;
+            --text-soft: #4f4443;
+            --primary: #735855;
+            --primary-soft: #e8c5c1;
+            --gold: #735c00;
+            --danger: #ba1a1a;
+            --outline: rgba(129, 116, 114, 0.2);
+            --radius-lg: 1rem;
+            --radius-xl: 1.5rem;
+            --shadow-ambient: 0 20px 40px rgba(28, 27, 26, 0.06);
         }
-        .service-form input:invalid:focus,
-        .appointment-form input:invalid:focus,
-        .appointment-form select:invalid:focus {
+
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            font-family: "Manrope", sans-serif;
+            color: var(--text);
+            background:
+                radial-gradient(1000px 520px at 90% 10%, rgba(232, 197, 193, 0.33), transparent 60%),
+                radial-gradient(880px 460px at 10% 45%, rgba(215, 231, 213, 0.24), transparent 62%),
+                var(--surface);
+        }
+
+        h1, h2, h3, h4 { margin: 0; font-family: "Noto Serif", serif; font-weight: 600; }
+        p { margin: 0; }
+
+        .top-nav {
+            position: sticky;
+            top: 0;
+            z-index: 40;
+            backdrop-filter: blur(20px);
+            background: rgba(253, 249, 246, 0.8);
+        }
+
+        .nav-inner,
+        .marketing-wrap,
+        .dashboard-wrap,
+        .footer-wrap {
+            width: min(1180px, 92vw);
+            margin: 0 auto;
+        }
+
+        .nav-inner {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            padding: 1rem 0;
+        }
+
+        .brand {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.45rem;
+            font-family: "Noto Serif", serif;
+            font-style: italic;
+            font-size: 1.45rem;
+        }
+
+        .brand-logo {
+            width: 1.4rem;
+            height: 1.4rem;
+            object-fit: cover;
+            border-radius: 0.35rem;
+        }
+
+        .brand-label {
+            line-height: 1;
+        }
+
+        .brand-btn {
+            border: 0;
+            background: transparent;
+            color: var(--text);
+            cursor: pointer;
+            padding: 0;
+        }
+
+        .nav-actions { display: flex; gap: 0.6rem; flex-wrap: wrap; }
+
+        .nav-center {
+            display: none;
+            gap: 1.1rem;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .nav-center a,
+        .nav-center button {
+            color: var(--text-soft);
+            text-decoration: none;
+            font-family: "Noto Serif", serif;
+            font-size: 0.95rem;
+            padding-bottom: 0.1rem;
+            border-bottom: 1px solid transparent;
+            transition: color 0.15s ease, border-color 0.15s ease;
+        }
+
+        .nav-center button {
+            border: 0;
+            background: transparent;
+            cursor: pointer;
+            padding: 0 0 0.1rem;
+        }
+
+        .nav-center a:hover,
+        .nav-center button:hover {
+            color: var(--text);
+            border-color: rgba(129, 116, 114, 0.45);
+        }
+
+        .nav-link-btn,
+        .refresh-btn,
+        .hero-primary-btn,
+        .service-form button,
+        .appointment-form button,
+        .users-form button,
+        .edit-form button,
+        .confirm-delete-btn,
+        .small-btn,
+        .logout-btn,
+        .login-form button {
+            border: 0;
+            border-radius: 999px;
+            padding: 0.58rem 1rem;
+            cursor: pointer;
+            font-family: "Manrope", sans-serif;
+            font-size: 0.8rem;
+            font-weight: 600;
+            letter-spacing: 0.03em;
+            text-transform: uppercase;
+            transition: transform 0.15s ease, opacity 0.15s ease;
+        }
+
+        .nav-link-btn {
+            border: 1px solid var(--outline);
+            color: var(--text);
+            background: rgba(255, 255, 255, 0.6);
+        }
+
+        .top-auth-btn {
+            color: #fff;
+            border: 0;
+            background: linear-gradient(135deg, var(--primary), var(--primary-soft));
+        }
+
+        .refresh-btn,
+        .hero-primary-btn,
+        .service-form button,
+        .appointment-form button,
+        .users-form button,
+        .edit-form button,
+        .login-form button {
+            color: #fff;
+            background: linear-gradient(135deg, var(--primary), var(--primary-soft));
+        }
+
+        .logout-btn,
+        .confirm-delete-btn,
+        .delete-user-btn,
+        .delete-btn,
+        .delete-service-btn {
+            color: #fff;
+            background: var(--danger);
+        }
+
+        .nav-link-btn:hover,
+        .refresh-btn:hover,
+        .hero-primary-btn:hover,
+        .service-form button:hover,
+        .appointment-form button:hover,
+        .users-form button:hover,
+        .edit-form button:hover,
+        .confirm-delete-btn:hover,
+        .small-btn:hover,
+        .logout-btn:hover,
+        .login-form button:hover {
+            opacity: 0.92;
+            transform: translateY(-1px);
+        }
+
+        .marketing-wrap {
+            padding: 2.2rem 0 4rem;
+            display: block;
+        }
+
+        .hero-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1.4rem;
+            margin-bottom: 3rem;
+        }
+
+        .biz-card {
+            background: var(--surface-card);
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow-ambient);
+            padding: 1.2rem;
+        }
+
+        .marketing-wrap .biz-card {
+            background: transparent;
+            box-shadow: none;
+            padding: 0;
+            border-radius: 0;
+        }
+
+        .eyebrow {
+            display: inline-block;
+            text-transform: uppercase;
+            letter-spacing: 0.2em;
+            font-size: 0.72rem;
+            color: var(--text-soft);
+            margin-bottom: 0.8rem;
+        }
+
+        .biz-title {
+            font-size: clamp(2rem, 6.4vw, 4.8rem);
+            line-height: 1.02;
+            margin-bottom: 1rem;
+            max-width: 10ch;
+        }
+
+        .biz-title .line {
+            display: block;
+        }
+
+        .biz-title .line-shift {
+            margin-left: clamp(0.4rem, 2.5vw, 2.2rem);
+        }
+
+        .biz-text {
+            color: var(--text-soft);
+            max-width: 54ch;
+            margin-bottom: 1rem;
+        }
+
+        .owner-photo {
+            width: 100%;
+            min-height: 300px;
+            object-fit: cover;
+            border-radius: var(--radius-xl);
+        }
+
+        .about-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 2rem;
+            margin-bottom: 3.5rem;
+        }
+
+        .works-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 0.8rem;
+        }
+
+        .works-grid img {
+            width: 100%;
+            aspect-ratio: 4 / 5;
+            object-fit: cover;
+            border-radius: 0.95rem;
+        }
+
+        .marketing-divider {
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(129, 116, 114, 0.28), transparent);
+            margin: 0 0 3rem;
+        }
+
+        .showcase-section {
+            margin-bottom: 3.6rem;
+        }
+
+        .review-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 0.9rem;
+        }
+
+        .review-item {
+            background: rgba(255, 255, 255, 0.72);
+            border-radius: 1rem;
+            padding: 1rem;
+        }
+
+        .review-item p {
+            color: var(--text-soft);
+            margin-bottom: 0.5rem;
+        }
+
+        .review-item strong {
+            font-family: "Noto Serif", serif;
+            font-weight: 600;
+            color: var(--text);
+        }
+
+        .showcase-heading {
+            display: flex;
+            justify-content: space-between;
+            align-items: end;
+            gap: 1rem;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .showcase-heading h2 {
+            font-size: clamp(1.7rem, 4vw, 3rem);
+        }
+
+        .showcase-sub {
+            color: var(--text-soft);
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            font-size: 0.72rem;
+        }
+
+        .services-marketing-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1rem;
+        }
+
+        .service-teaser {
+            background: rgba(255, 255, 255, 0.62);
+            border-radius: var(--radius-lg);
+            padding: 0.8rem;
+        }
+
+        .service-teaser img {
+            width: 100%;
+            aspect-ratio: 4 / 5;
+            object-fit: cover;
+            border-radius: 0.9rem;
+            margin-bottom: 0.7rem;
+        }
+
+        .service-teaser h3 {
+            font-size: 1.45rem;
+            margin-bottom: 0.35rem;
+        }
+
+        .service-teaser p {
+            color: var(--text-soft);
+            font-size: 0.9rem;
+        }
+
+        .gallery-strip {
+            display: flex;
+            gap: 0.8rem;
+            overflow-x: auto;
+            padding-bottom: 0.5rem;
+            scrollbar-width: none;
+        }
+
+        .gallery-strip::-webkit-scrollbar {
+            display: none;
+        }
+
+        .gallery-strip img {
+            flex: 0 0 260px;
+            width: 260px;
+            aspect-ratio: 1 / 1;
+            object-fit: cover;
+            border-radius: 0.95rem;
+        }
+
+        .newsletter-box {
+            background: rgba(215, 231, 213, 0.35);
+            border-radius: 1.8rem;
+            padding: 1.8rem;
+            text-align: center;
+        }
+
+        .newsletter-box h2 {
+            font-size: clamp(1.65rem, 3.2vw, 2.5rem);
+            margin-bottom: 0.5rem;
+        }
+
+        .newsletter-box p {
+            color: var(--text-soft);
+            margin-bottom: 1rem;
+        }
+
+        .newsletter-form {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.6rem;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .newsletter-form input {
+            max-width: 290px;
+            background: #fff;
+        }
+
+        .dashboard-wrap {
+            display: none;
+            padding: 1.4rem 0 3rem;
+        }
+
+        .dashboard-head {
+            background: var(--surface-card);
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow-ambient);
+            padding: 1.2rem;
+            margin-bottom: 1.2rem;
+        }
+
+        .dashboard-head-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 1rem;
+            flex-wrap: wrap;
+            margin-bottom: 0.75rem;
+        }
+
+        .dashboard-head h1 {
+            font-size: clamp(1.7rem, 4vw, 2.7rem);
+            margin-bottom: 0.2rem;
+        }
+
+        #authMessage {
+            margin-top: 0.3rem;
+            color: var(--text-soft);
+            font-size: 0.9rem;
+        }
+
+        .content-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1.2rem;
+        }
+
+        .panel {
+            background: var(--surface-low);
+            border-radius: var(--radius-xl);
+            padding: 1.2rem;
+        }
+
+        .panel h2 {
+            font-size: clamp(1.4rem, 2.6vw, 2.2rem);
+            margin-bottom: 0.2rem;
+        }
+
+        .panel-note {
+            color: var(--text-soft);
+            font-size: 0.82rem;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            margin-bottom: 0.7rem;
+        }
+
+        #organizationSection .content-grid {
+            grid-template-columns: 1fr;
+        }
+
+        #organizationSection .panel {
+            width: 100%;
+            overflow-x: auto;
+        }
+
+        #organizationSection #servicesTable,
+        #organizationSection #usersTable {
+            min-width: 1100px;
+        }
+
+        #organizationSection #servicesTable th,
+        #organizationSection #servicesTable td,
+        #organizationSection #usersTable th,
+        #organizationSection #usersTable td {
+            white-space: nowrap;
+        }
+
+        #organizationSection .action-inline {
+            flex-wrap: nowrap;
+        }
+
+        /* Calendar Styles */
+        .calendar-wrapper {
+            margin-bottom: 2rem;
+            background: var(--surface-card);
+            border-radius: var(--radius-lg);
+            padding: 1rem;
+            border: 1px solid var(--outline);
+            display: grid;
+            grid-template-columns: minmax(720px, 1fr) minmax(320px, 380px);
+            gap: 1.5rem;
+            align-items: start;
+            overflow-x: auto;
+        }
+
+        .calendar-container {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.2rem;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .calendar-header button {
+            padding: 0.5rem 1rem;
+            background: var(--surface-low);
+            border: 1px solid var(--outline);
+            border-radius: 0.5rem;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.15s ease;
+        }
+
+        .calendar-header button:hover {
+            background: var(--primary-soft);
+            border-color: var(--primary);
+        }
+
+        .calendar-month-year {
+            font-size: 1.1rem;
+            font-weight: 600;
+            font-family: "Noto Serif", serif;
+        }
+
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 0.6rem;
+            margin-bottom: 1rem;
+        }
+
+        .calendar-day-header {
+            background: var(--primary);
+            color: white;
+            padding: 0.6rem;
+            text-align: center;
+            font-weight: 600;
+            font-size: 0.8rem;
+            border-radius: 0.4rem;
+        }
+
+        .calendar-day {
+            border: 1px solid var(--outline);
+            border-radius: 0.6rem;
+            padding: 0.6rem;
+            min-height: 100px;
+            background: var(--surface);
+            cursor: pointer;
+            transition: all 0.15s ease;
+            display: flex;
+            flex-direction: column;
+            font-size: 0.85rem;
+        }
+
+        .calendar-day:hover {
+            border-color: var(--primary);
+            box-shadow: 0 2px 8px rgba(115, 88, 85, 0.1);
+        }
+
+        .calendar-day.other-month {
+            color: var(--text-soft);
+            background: var(--surface-low);
+        }
+
+        .calendar-day.today {
+            border: 2px solid var(--primary);
+            background: rgba(232, 197, 193, 0.2);
+        }
+
+        .calendar-day.selected {
+            border: 2px solid var(--primary);
+            background: var(--primary-soft);
+            font-weight: 600;
+        }
+
+        .calendar-day-number {
+            font-weight: 600;
+            margin-bottom: 0.4rem;
+            color: var(--text);
+        }
+
+        .calendar-appointment-item {
+            background: var(--primary-soft);
+            padding: 0.3rem 0.4rem;
+            border-radius: 0.3rem;
+            margin-bottom: 0.2rem;
+            color: var(--text);
+            font-size: 0.75rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+
+        .calendar-appointment-item:hover {
+            background: var(--primary);
+            color: white;
+        }
+
+        .day-details-panel {
+            background: var(--surface-low);
+            border: 1px solid var(--outline);
+            border-radius: var(--radius-lg);
+            padding: 1.2rem;
+            display: none;
+            flex-direction: column;
+            min-height: 100%;
+        }
+
+        .day-details-panel.show {
+            display: flex;
+        }
+
+        .day-details-header {
+            margin-bottom: 1.2rem;
+            border-bottom: 2px solid var(--primary);
+            padding-bottom: 1rem;
+        }
+
+        .day-details-header h3 {
+            margin: 0 0 0.5rem 0;
+            font-size: 1.3rem;
+            color: var(--text);
+        }
+
+        .day-details-header p {
+            margin: 0;
+            color: var(--text-soft);
+            font-size: 0.9rem;
+        }
+
+        .employee-filter {
+            margin-bottom: 1.2rem;
+        }
+
+        .employee-filter label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        .employee-filter select {
+            width: 100%;
+            padding: 0.6rem;
+            border: 1px solid var(--outline);
+            border-radius: 0.5rem;
+            background: var(--surface-card);
+            color: var(--text);
+            cursor: pointer;
+        }
+
+        .appointments-list {
+            flex: 1;
+            overflow-y: auto;
+            max-height: 560px;
+        }
+
+        .appointment-card {
+            background: var(--surface-card);
+            border-left: 3px solid var(--primary);
+            border-radius: 0.5rem;
+            padding: 0.8rem;
+            margin-bottom: 0.8rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .appointment-card h4 {
+            margin: 0 0 0.4rem 0;
+            font-size: 1rem;
+            color: var(--text);
+        }
+
+        .appointment-card p {
+            margin: 0.2rem 0;
+            font-size: 0.85rem;
+            color: var(--text-soft);
+        }
+
+        .no-appointments {
+            text-align: center;
+            color: var(--text-soft);
+            padding: 2rem 0;
+        }
+
+        @media (max-width: 1280px) {
+            .calendar-wrapper {
+                grid-template-columns: 1fr;
+                overflow-x: visible;
+            }
+
+            .appointments-list {
+                max-height: none;
+            }
+        }
+
+        .appointment-details-card {
+            background: var(--surface-card);
+            border: 1px solid var(--outline);
+            border-radius: var(--radius-lg);
+            padding: 1rem;
+            margin-top: 1rem;
+            display: none;
+        }
+
+        .appointment-details-card.show {
+            display: block;
+        }
+
+        .appointment-details-card h3 {
+            margin-top: 0;
+            margin-bottom: 1rem;
+            font-size: 1.1rem;
+        }
+
+        .appointment-detail-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.6rem 0;
+            border-bottom: 1px solid var(--outline);
+        }
+
+        .appointment-detail-row:last-child {
+            border-bottom: none;
+        }
+
+        .appointment-detail-label {
+            font-weight: 600;
+            color: var(--text-soft);
+        }
+
+        .appointment-detail-value {
+            color: var(--text);
+        }
+
+        .artist-assignment {
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--outline);
+        }
+
+        .artist-assignment label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+
+        .artist-assignment select {
+            width: 100%;
+            margin-bottom: 0.6rem;
+        }
+
+        .artist-assignment button {
+            padding: 0.6rem 1rem;
+            background: linear-gradient(135deg, var(--primary), var(--primary-soft));
+            color: white;
+            border: 0;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.15s ease;
+        }
+
+        .artist-assignment button:hover {
+            opacity: 0.92;
+        }
+
+        .login-form,
+        .service-form,
+        .appointment-form,
+        .users-form {
+            margin-top: 0.9rem;
+            display: flex;
+            gap: 0.7rem;
+            flex-wrap: wrap;
+            align-items: flex-end;
+            padding: 0.85rem;
+            border: 1px solid var(--outline);
+            border-radius: 1rem;
+            background: rgba(255, 255, 255, 0.58);
+        }
+
+        .login-controls {
+            display: flex;
+            gap: 0.6rem;
+            flex-wrap: wrap;
+            align-items: center;
+            width: 100%;
+        }
+
+        .login-form .user-info {
+            margin-left: auto;
+            color: var(--text-soft);
+            font-size: 0.9rem;
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .field-group { display: flex; flex-direction: column; gap: 0.2rem; min-width: 180px; flex: 1; }
+
+        .appointment-form .button-wrapper { display: flex; flex-direction: column; gap: 0.2rem; min-width: 180px; }
+
+        input, select {
+            width: 100%;
+            min-height: 42px;
+            border-radius: 999px;
+            border: 1px solid var(--outline);
+            background: var(--surface-panel);
+            color: var(--text);
+            padding: 0.55rem 0.9rem;
+            font-family: "Manrope", sans-serif;
+        }
+
+        input:focus, select:focus {
             outline: none;
-            box-shadow: 0 0 0 2px rgba(220, 53, 69, 0.35);
+            border-color: var(--gold);
+            box-shadow: 0 0 0 2px rgba(115, 92, 0, 0.11);
         }
-        .edit-btn { background: #ffc107; color: black; border: none; padding: 5px 10px; cursor: pointer; border-radius: 3px; }
-        .delete-btn { background: #dc3545; color: white; border: none; padding: 5px 10px; cursor: pointer; border-radius: 3px; }
-        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; }
+
+        .field-error { min-height: 16px; color: var(--danger); font-size: 12px; }
+        .invalid-field { border-color: var(--danger) !important; }
+
+        table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            margin-top: 1rem;
+            background: rgba(255, 255, 255, 0.62);
+            border: 1px solid var(--outline);
+            border-radius: 0.9rem;
+            overflow: hidden;
+        }
+
+        th {
+            color: var(--text-soft);
+            font-size: 0.74rem;
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            text-align: left;
+            padding: 0.78rem 0.75rem;
+            background: rgba(241, 237, 234, 0.95);
+        }
+
+        td {
+            background: transparent;
+            color: var(--text);
+            padding: 0.72rem 0.75rem;
+            vertical-align: middle;
+            font-size: 0.92rem;
+            border-top: 1px solid rgba(129, 116, 114, 0.12);
+        }
+
+        tbody tr:hover td {
+            background: rgba(232, 197, 193, 0.16);
+        }
+
+        .action-inline {
+            display: flex;
+            gap: 0.45rem;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .small-btn { font-size: 0.74rem; padding: 0.42rem 0.75rem; }
+        .save-btn, .password-btn, .toggle-btn { border: 1px solid var(--outline); background: var(--surface-panel); color: var(--text); }
+        .small-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+        .meta-pill {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0.2rem 0.55rem;
+            border-radius: 999px;
+            border: 1px solid rgba(115, 88, 85, 0.26);
+            background: rgba(255, 255, 255, 0.72);
+            font-size: 0.74rem;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+        }
+
+        .status-pill {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 82px;
+            padding: 0.22rem 0.6rem;
+            border-radius: 999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            border: 1px solid transparent;
+            background: rgba(129, 116, 114, 0.14);
+            color: var(--text);
+        }
+
+        .status-pill.status-new {
+            background: rgba(232, 197, 193, 0.35);
+            border-color: rgba(115, 88, 85, 0.24);
+        }
+
+        .status-pill.status-confirmed,
+        .status-pill.status-done {
+            background: rgba(215, 231, 213, 0.52);
+            border-color: rgba(75, 110, 72, 0.28);
+        }
+
+        .status-pill.status-cancelled {
+            background: rgba(186, 26, 26, 0.12);
+            border-color: rgba(186, 26, 26, 0.26);
+            color: #7d1a1a;
+        }
+
+        .action-btn,
+        .small-btn,
+        .edit-service-btn,
+        .edit-appointment-btn,
+        .delete-service-btn,
+        .delete-btn,
+        .delete-user-btn-action,
+        .save-user-role-btn,
+        .reset-user-password-btn,
+        .toggle-user-enabled-btn {
+            border: 1px solid var(--outline);
+            border-radius: 999px;
+            padding: 0.38rem 0.72rem;
+            font-size: 0.73rem;
+            font-weight: 600;
+            letter-spacing: 0.03em;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: transform 0.15s ease, opacity 0.15s ease, background-color 0.15s ease;
+            background: rgba(255, 255, 255, 0.85);
+            color: var(--text);
+        }
+
+        .edit-service-btn,
+        .edit-appointment-btn,
+        .save-user-role-btn,
+        .reset-user-password-btn,
+        .toggle-user-enabled-btn {
+            background: rgba(232, 197, 193, 0.5);
+            border-color: rgba(115, 88, 85, 0.22);
+        }
+
+        .delete-service-btn,
+        .delete-btn,
+        .delete-user-btn-action {
+            background: rgba(186, 26, 26, 0.12);
+            border-color: rgba(186, 26, 26, 0.26);
+            color: #8f1d1d;
+        }
+
+        .action-btn:hover,
+        .small-btn:hover,
+        .edit-service-btn:hover,
+        .edit-appointment-btn:hover,
+        .delete-service-btn:hover,
+        .delete-btn:hover,
+        .delete-user-btn-action:hover,
+        .save-user-role-btn:hover,
+        .reset-user-password-btn:hover,
+        .toggle-user-enabled-btn:hover {
+            opacity: 0.92;
+            transform: translateY(-1px);
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(28, 27, 26, 0.35);
+            backdrop-filter: blur(7px);
+            z-index: 1000;
+        }
+
         .modal.show { display: flex; align-items: center; justify-content: center; }
-        .modal-content { background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); width: 90%; max-width: 500px; }
-        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-        .modal-header h2 { margin: 0; }
-        .modal-close { background: none; border: none; font-size: 24px; cursor: pointer; }
-        .edit-form { display: flex; flex-direction: column; gap: 12px; }
-        .edit-form input, .edit-form select { padding: 8px; border: 1px solid #ccc; border-radius: 5px; }
-        .edit-form button { background: #0d6efd; color: white; border: none; padding: 10px; cursor: pointer; border-radius: 5px; }
-        .login-form { display: flex; gap: 10px; flex-wrap: wrap; align-items: flex-end; }
-        .login-form input { padding: 8px; border: 1px solid #ccc; border-radius: 5px; }
-        .login-form button { background: #6c757d; color: white; border: none; padding: 8px 14px; cursor: pointer; border-radius: 5px; }
-        .login-form .user-info { margin-left: auto; font-size: 14px; }
-        .logout-btn { background: #dc3545; color: white; border: none; padding: 5px 10px; cursor: pointer; border-radius: 3px; }
-        .users-form { margin-top: 16px; display: flex; gap: 10px; flex-wrap: wrap; }
-        .users-form input, .users-form select { padding: 8px; border: 1px solid #ccc; border-radius: 5px; }
-        .users-form button { background: #198754; color: white; border: none; padding: 8px 14px; cursor: pointer; border-radius: 5px; }
-        .action-inline { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
-        .small-btn { border: none; padding: 6px 10px; border-radius: 4px; cursor: pointer; }
-        .save-btn { background: #0d6efd; color: white; }
-        .password-btn { background: #6f42c1; color: white; }
-        .toggle-btn { background: #fd7e14; color: white; }
-        .delete-user-btn { background: #dc3545; color: white; }
-        .small-btn:disabled { opacity: 0.5; cursor: not-allowed; }
-        .modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 16px; }
-        .cancel-btn { background: #6c757d; color: white; border: none; padding: 8px 14px; border-radius: 5px; cursor: pointer; }
-        .confirm-delete-btn { background: #dc3545; color: white; border: none; padding: 8px 14px; border-radius: 5px; cursor: pointer; }
+
+        .modal-content {
+            background: var(--surface-card);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-ambient);
+            width: min(560px, 92vw);
+            padding: 1.45rem;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.65rem;
+        }
+
+        .modal-header h2 { font-size: 1.5rem; }
+        .modal-close { background: none; border: 0; font-size: 1.6rem; cursor: pointer; color: var(--text-soft); }
+
+        .edit-form { display: flex; flex-direction: column; gap: 0.7rem; margin-top: 0.7rem; }
+        .modal-actions { display: flex; justify-content: flex-end; gap: 0.6rem; margin-top: 1rem; }
+        .cancel-btn { border: 1px solid var(--outline); background: var(--surface-panel); color: var(--text); border-radius: 999px; padding: 0.55rem 1rem; }
+
+        .footer-wrap {
+            padding: 2rem 0 2.5rem;
+            color: var(--text-soft);
+            font-size: 0.84rem;
+        }
+
+        @media (min-width: 980px) {
+            .hero-grid { grid-template-columns: 1.1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem; }
+            .about-grid { grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem; }
+            .works-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+            .services-marketing-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+            .review-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+            .nav-center { display: flex; }
+            .content-grid { grid-template-columns: 1fr 1fr; }
+            #usersManagementSection.panel { grid-column: 1 / -1; }
+        }
+
+        @media (max-width: 760px) {
+            th:nth-child(1), td:nth-child(1) { display: none; }
+            .works-grid { grid-template-columns: 1fr; }
+            .showcase-heading { align-items: flex-start; }
+            .gallery-strip img { flex-basis: 210px; width: 210px; }
+            .login-form .user-info { margin-left: 0; width: 100%; }
+            .modal-content { padding: 1rem; }
+        }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <h1>💅 System Rezerwacji Salonu</h1>
-    
-    <div class="login-form" id="authSection">
-        <input type="text" id="username" placeholder="Nazwa użytkownika" value="admin">
-        <input type="password" id="password" placeholder="Hasło" value="admin123">
-        <button onclick="login()">Zaloguj</button>
-        <div class="user-info" id="userInfo" style="display: none;">
-            Zalogowany jako: <strong id="currentUser"></strong>
-            <button class="logout-btn" onclick="logout()">Wyloguj</button>
+<header class="top-nav">
+    <div class="nav-inner">
+        <button class="brand brand-btn" onclick="showMarketingSection()">
+            <img class="brand-logo" src="../src/assets/BeeNails.png" alt="BeeNails logo">
+            <span class="brand-label">BeeNails</span>
+        </button>
+        <div class="nav-center">
+            <button type="button" onclick="window.location.href='services.html'">Services</button>
+            <button type="button" onclick="window.location.href='lookbook.html'">Gallery</button>
+            <button type="button" onclick="showMarketingSection('reviewsSection')">Reviews</button>
+            <button type="button" id="navBookingButton" style="display: none;" onclick="window.location.href='booking.html'">Book</button>
+            <button type="button" id="navStuffButton" style="display: none;" onclick="openRoleMarketingView('stuff')">Stuff</button>
+            <button type="button" id="navOrganizationButton" style="display: none;" onclick="openRoleMarketingView('organization')">Organization</button>
+        </div>
+        <div class="nav-actions">
+            <button id="topAuthButton" class="nav-link-btn top-auth-btn" onclick="handleTopAuthButton()">Zaloguj</button>
+        </div>
+    </div>
+</header>
+
+<section id="marketingSection" class="marketing-wrap">
+    <div id="mainLandingContent">
+    <div class="hero-grid">
+        <article class="biz-card">
+            <span class="eyebrow">The New Standard of Beauty</span>
+            <h1 class="biz-title">
+                <span class="line" style="font-style: italic;">The Curated</span>
+                <span class="line line-shift">Art of</span>
+                <span class="line">Glow</span>
+            </h1>
+            <p class="biz-text">
+                BeeNails to autorski salon Natalii, laczacy nowoczesna estetyke z pielegnacja premium.
+                Pracujemy w stylu clean-girl: naturalnie, czysto i z pelna precyzja.
+            </p>
+            <button class="hero-primary-btn" onclick="showDashboardSection()">Book / Panel</button>
+        </article>
+        <article class="biz-card">
+            <img class="owner-photo" src="../src/assets/main_page.png" alt="Natalia - CEO BeeNails">
+        </article>
+    </div>
+
+    <div class="marketing-divider"></div>
+
+    <div class="about-grid" id="aboutSection">
+        <article class="biz-card">
+            <h2 style="font-size: 2rem; margin-bottom: 0.8rem;">BeeNails Ethos</h2>
+            <p class="biz-text">
+                Natalia prowadzi BeeNails w rytmie premium slow beauty.
+                Kazda wizyta to spokojna przestrzen, konsultacja i detale dopasowane do Ciebie.
+            </p>
+            <p class="biz-text">
+                Specjalizacje: manicure konstrukcyjny, editorial nail art, soft lash lift, rytualy pielegnacyjne dloni, endermologia, peelingi chemiczne i enzymatyczne, zabiegi anti-age oraz rytualy pielegnacyjne twarzy i ciala.
+            </p>
+        </article>
+        <article class="biz-card">
+            <h2 style="font-size: 2rem; margin-bottom: 0.8rem;">Przykladowe prace</h2>
+            <div class="works-grid">
+                <img src="../src/assets/nails1.jpg" alt="Stylizacja 1">
+                <img src="../src/assets/nails2.jpg" alt="Stylizacja 2">
+                <img src="../src/assets/nails3.jpg" alt="Stylizacja 3">
+            </div>
+        </article>
+    </div>
+
+    <section class="showcase-section" id="servicesSection">
+        <div class="showcase-heading">
+            <div>
+                <h2>Trending Services</h2>
+                <p class="showcase-sub">The essentials for your daily radiance</p>
+            </div>
+        </div>
+        <div class="services-marketing-grid">
+            <article class="service-teaser">
+                <img src="../src/assets/nails4.jpg" alt="Builder manicure">
+                <h3>The Builder Manicure</h3>
+                <p>Strength meets elegance. Trwala stylizacja i naturalne wykonczenie.</p>
+            </article>
+            <article class="service-teaser">
+                <img src="../src/assets/nails5.jpg" alt="Lash lift">
+                <h3>Velvet Gloss Manicure</h3>
+                <p>Podkresl spojrzenie bez przesady. Efekt clean i lekki.</p>
+            </article>
+            <article class="service-teaser">
+                <img src="../src/assets/nails6.jpg" alt="Editorial nail art">
+                <h3>Editorial Nail Art</h3>
+                <p>Subtelne zdobienia, minimalistyczne linie i precyzja detalu.</p>
+            </article>
+        </div>
+    </section>
+
+    <section class="showcase-section" id="gallerySection">
+        <div class="showcase-heading">
+            <div>
+                <h2>Our Gallery</h2>
+                <p class="showcase-sub">Captured by our community</p>
+            </div>
+            <span class="showcase-sub">@beenails.studio</span>
+        </div>
+        <div class="gallery-strip">
+            <img src="../src/assets/nails4.jpg" alt="Gallery 1">
+            <img src="../src/assets/nails5.jpg" alt="Gallery 2">
+            <img src="../src/assets/nails6.jpg" alt="Gallery 3">
+            <img src="../src/assets/nails7.jpg" alt="Gallery 4">
+            <img src="../src/assets/nails8.jpg" alt="Gallery 5">
+        </div>
+    </section>
+
+    <section class="showcase-section" id="reviewsSection">
+        <div class="showcase-heading">
+            <div>
+                <h2>Reviews</h2>
+                <p class="showcase-sub">What clients say about Natalia</p>
+            </div>
+        </div>
+        <div class="review-grid">
+            <article class="review-item">
+                <p>"Przepiękne paznokcie 💖 Pani Natalia bardzo dokładna i przesympatyczna , super atmosfera,paznokcie prześliczne i precyzyjnie zrobione polecam serdecznie 🤩."</p>
+                <strong>Karolina S.</strong>
+            </article>
+            <article class="review-item">
+                <p>"Jestem bardzo zadowolona z wizyty. Przemiło spędzony czas , bardzo profesjonalne podejście. Manicure wykonany prze Panią Natalię przepiękny 🩷."</p>
+                <strong>Monika R.</strong>
+            </article>
+            <article class="review-item">
+                <p>"Jestem bardzo zadowolona z manicure hybrydowego wykonywanego przez Panią Natalię, który jest staranny i precyzyjny. Polecam gorąco.."</p>
+                <strong>Ola M.</strong>
+            </article>
+        </div>
+    </section>
+
+    <section class="showcase-section">
+        <div class="newsletter-box">
+            <h2>Join BeeNails</h2>
+            <p>Zapisz sie po inspiracje, nowosci i priorytetowe terminy.</p>
+            <form class="newsletter-form" onsubmit="event.preventDefault(); alert('Dziekujemy za zapis!');">
+                <input type="email" placeholder="Twoj email" required>
+                <button type="submit" class="hero-primary-btn">Join Now</button>
+            </form>
+        </div>
+    </section>
+
+    <section class="showcase-section">
+        <h2 style="font-size: 2rem; margin-bottom: 0.6rem;">Kontakt</h2>
+        <p class="biz-text">Instagram: @beenails.studio | Telefon: +48 500 000 000 | Warszawa, Srodmiescie</p>
+        <button class="hero-primary-btn" onclick="showDashboardSection()">Przejdz do panelu zarzadzania</button>
+    </section>
+    </div>
+
+    <section class="showcase-section" id="stuffSection" style="display: none;">
+        <div class="showcase-heading">
+            <div>
+                <h2>Stuff</h2>
+                <p class="showcase-sub">Strefa pracy zespolu: tworzenie i obsluga wizyt</p>
+            </div>
+        </div>
+        <div class="content-grid">
+            <section class="panel" id="appointmentsPanel">
+                <h2>Zaplanowane Wizyty</h2>
+                <p class="panel-note">Appointments</p>
+
+                <!-- Calendar View -->
+                <div class="calendar-wrapper">
+                    <div class="calendar-container">
+                        <div class="calendar-header">
+                            <button onclick="calendarPreviousMonth()">&larr; Poprzedni</button>
+                            <div class="calendar-month-year" id="calendarMonthYear"></div>
+                            <button onclick="calendarNextMonth()">Następny &rarr;</button>
+                        </div>
+                        <div class="calendar-grid" id="calendarGrid"></div>
+                    </div>
+
+                    <!-- Day Details Panel -->
+                    <div class="day-details-panel" id="dayDetailsPanel">
+                        <div class="day-details-header">
+                            <h3 id="selectedDayTitle"></h3>
+                            <p id="selectedDayDate"></p>
+                        </div>
+
+                        <div class="employee-filter">
+                            <label for="employeeFilter">Filtruj po pracowniku:</label>
+                            <select id="employeeFilter" onchange="updateDayAppointmentsDisplay()">
+                                <option value="">Wszyscy pracownicy</option>
+                                <option value="Natalia Gąsiorowska">Natalia Gąsiorowska</option>
+                                <option value="Julian Reed">Julian Reed</option>
+                                <option value="Maya Chen">Maya Chen</option>
+                            </select>
+                        </div>
+
+                        <div class="appointments-list" id="dayAppointmentsList">
+                            <div class="no-appointments">Brak wizyt w wybranym dniu</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Selected Appointment Details -->
+                <div class="appointment-details-card" id="appointmentDetailsCard">
+                    <h3 id="detailsClientName"></h3>
+                    <div class="appointment-detail-row">
+                        <span class="appointment-detail-label">Czas:</span>
+                        <span class="appointment-detail-value" id="detailsTime"></span>
+                    </div>
+                    <div class="appointment-detail-row">
+                        <span class="appointment-detail-label">Usługa:</span>
+                        <span class="appointment-detail-value" id="detailsService"></span>
+                    </div>
+                    <div class="appointment-detail-row">
+                        <span class="appointment-detail-label">Status:</span>
+                        <span class="appointment-detail-value" id="detailsStatus"></span>
+                    </div>
+                    <div class="artist-assignment">
+                        <label for="calendarArtistSelect">Przydziel osobę:</label>
+                        <select id="calendarArtistSelect">
+                            <option value="">Bez przydzielenia</option>
+                            <option value="Natalia Gąsiorowska">Natalia Gąsiorowska</option>
+                            <option value="Julian Reed">Julian Reed</option>
+                            <option value="Maya Chen">Maya Chen</option>
+                        </select>
+                        <button onclick="saveCalendarArtistAssignment()">Przydziel</button>
+                    </div>
+                </div>
+
+                <h3 style="margin-top: 2rem; margin-bottom: 1rem;">Dodaj nową wizytę</h3>
+                <form id="addAppointmentForm" class="appointment-form">
+                    <div class="field-group">
+                        <input type="text" id="clientName" placeholder="Imie klienta" required>
+                        <small id="clientNameError" class="field-error"></small>
+                    </div>
+                    <div class="field-group">
+                        <input type="datetime-local" id="appointmentTime" required>
+                        <small id="appointmentTimeError" class="field-error"></small>
+                    </div>
+                    <div class="field-group">
+                        <select id="appointmentService" required>
+                            <option value="">Wybierz usluge</option>
+                        </select>
+                        <small id="appointmentServiceError" class="field-error"></small>
+                    </div>
+                    <div class="field-group">
+                        <input type="text" id="appointmentStatus" placeholder="Status" value="NEW" required>
+                        <small id="appointmentStatusError" class="field-error"></small>
+                    </div>
+                    <div class="field-group" style="flex: 0.6;">
+                        <select id="appointmentArtist">
+                            <option value="">Bez przydzielenia</option>
+                            <option value="Natalia Gąsiorowska">Natalia Gąsiorowska</option>
+                            <option value="Julian Reed">Julian Reed</option>
+                            <option value="Maya Chen">Maya Chen</option>
+                        </select>
+                        <small class="field-error"></small>
+                    </div>
+                    <div class="button-wrapper">
+                        <button type="submit">Dodaj wizyte</button>
+                    </div>
+                </form>
+
+                <h3 style="margin-top: 2rem; margin-bottom: 1rem;">Wszystkie wizyty</h3>
+                <table id="appointmentsTable">
+                    <thead>
+                        <tr>
+                            <th>Klient</th><th>Data</th><th>Usluga</th><th>Status</th><th id="appointmentActionsHeader">Akcje</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </section>
+        </div>
+    </section>
+
+    <section class="showcase-section" id="organizationSection" style="display: none;">
+        <div class="showcase-heading">
+            <div>
+                <h2>Organization</h2>
+                <p class="showcase-sub">Strefa administracyjna: uslugi, uzytkownicy i konfiguracja</p>
+            </div>
+        </div>
+        <div class="content-grid">
+            <section class="panel" id="servicesPanel">
+                <h2>Dostepne Uslugi</h2>
+                <p class="panel-note">Service Catalog</p>
+                <form id="addServiceForm" class="service-form">
+                    <div class="field-group">
+                        <input type="text" id="serviceName" placeholder="Nazwa uslugi" required>
+                        <small id="serviceNameError" class="field-error"></small>
+                    </div>
+                    <div class="field-group">
+                        <select id="serviceCategory" required>
+                            <option value="NAILS">Nails</option>
+                            <option value="LASHES">Lashes</option>
+                            <option value="SKIN">Skin</option>
+                        </select>
+                        <small id="serviceCategoryError" class="field-error"></small>
+                    </div>
+                    <div class="field-group">
+                        <input type="number" id="servicePrice" placeholder="Cena" min="0" step="0.01" required>
+                        <small id="servicePriceError" class="field-error"></small>
+                    </div>
+                    <div class="field-group">
+                        <input type="number" id="serviceDuration" placeholder="Czas (min)" min="1" step="1" required>
+                        <small id="serviceDurationError" class="field-error"></small>
+                    </div>
+                    <button type="submit">Dodaj usluge</button>
+                </form>
+
+                <table id="servicesTable">
+                    <thead>
+                        <tr>
+                            <th>ID</th><th>Nazwa</th><th>Kategoria</th><th>Cena</th><th>Czas (min)</th><th id="serviceActionsHeader">Akcje</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </section>
+
+            <section class="panel" id="usersManagementSection" style="display: none;">
+                <h2>Zarzadzanie Uzytkownikami</h2>
+                <p class="panel-note">Admin Area</p>
+                <form id="createUserForm" class="users-form">
+                    <input type="text" id="newUsername" placeholder="Nazwa uzytkownika" required>
+                    <input type="password" id="newUserPassword" placeholder="Haslo" required>
+                    <select id="newUserRole" required>
+                        <option value="STAFF">STAFF</option>
+                        <option value="CUSTOMER">CUSTOMER</option>
+                        <option value="OWNER">OWNER</option>
+                        <option value="ADMIN">ADMIN</option>
+                    </select>
+                    <button type="submit">Utworz uzytkownika</button>
+                </form>
+
+                <table id="usersTable">
+                    <thead>
+                        <tr>
+                            <th>ID</th><th>Uzytkownik</th><th>Rola</th><th>Status</th><th>Nowe haslo</th><th>Akcje</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </section>
+        </div>
+    </section>
+</section>
+
+<section id="dashboardSection" class="dashboard-wrap">
+    <div class="dashboard-head">
+        <div class="dashboard-head-top">
+            <div>
+                <span class="eyebrow">Management Suite</span>
+                <h1>BeeNails Zaloguj</h1>
+                <div id="authMessage"></div>
+            </div>
+            <div class="nav-actions">
+                <button class="nav-link-btn" onclick="showMarketingSection()">Powrot do strony</button>
+            </div>
+        </div>
+
+        <div class="login-form" id="authSection">
+            <div class="login-controls" id="loginControls">
+                <input type="text" id="username" placeholder="Nazwa uzytkownika" value="admin">
+                <input type="password" id="password" placeholder="Haslo" value="admin123">
+                <button onclick="login()">Zaloguj</button>
+            </div>
+            <div class="user-info" id="userInfo" style="display: none;">
+                Zalogowany jako: <strong id="currentUser"></strong>
+                <button class="logout-btn" onclick="logout()">Wyloguj</button>
+            </div>
         </div>
     </div>
 
-    <div id="authMessage" style="margin-top: 8px; color: #6c757d; font-size: 14px;"></div>
+    <div class="footer-wrap">BeeNails | Zaloguj</div>
+</section>
 
-    <div id="usersManagementSection" style="display: none; margin-top: 20px;">
-        <h2>Zarządzanie Użytkownikami</h2>
-        <form id="createUserForm" class="users-form">
-            <input type="text" id="newUsername" placeholder="Nazwa użytkownika" required>
-            <input type="password" id="newUserPassword" placeholder="Hasło" required>
-            <select id="newUserRole" required>
-                <option value="STAFF">STAFF</option>
-                <option value="CUSTOMER">CUSTOMER</option>
-                <option value="OWNER">OWNER</option>
-                <option value="ADMIN">ADMIN</option>
+<div id="editServiceModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>Edytuj usluge</h2>
+            <button class="modal-close" onclick="closeEditServiceModal()">&times;</button>
+        </div>
+        <form id="editServiceForm" class="edit-form">
+            <input type="hidden" id="editServiceId">
+            <input type="text" id="editServiceName" placeholder="Nazwa uslugi" required>
+            <small id="editServiceNameError" class="field-error"></small>
+            <select id="editServiceCategory" required>
+                <option value="NAILS">Nails</option>
+                <option value="LASHES">Lashes</option>
+                <option value="SKIN">Skin</option>
             </select>
-            <button type="submit">Utwórz użytkownika</button>
+            <small id="editServiceCategoryError" class="field-error"></small>
+            <input type="number" id="editServicePrice" placeholder="Cena" min="0" step="0.01" required>
+            <small id="editServicePriceError" class="field-error"></small>
+            <input type="number" id="editServiceDuration" placeholder="Czas (min)" min="1" step="1" required>
+            <small id="editServiceDurationError" class="field-error"></small>
+            <button type="submit">Zaktualizuj</button>
         </form>
-
-        <table id="usersTable">
-            <thead>
-                <tr>
-                    <th>ID</th><th>Użytkownik</th><th>Rola</th><th>Status</th><th>Nowe hasło</th><th>Akcje</th>
-                </tr>
-            </thead>
-            <tbody></tbody>
-        </table>
     </div>
+</div>
 
-    <button class="refresh-btn" onclick="loadData()">Odśwież dane</button>
-
-    <h2>Dostępne Usługi</h2>
-    <form id="addServiceForm" class="service-form">
-        <div class="field-group">
-            <input type="text" id="serviceName" placeholder="Nazwa usługi" required>
-            <small id="serviceNameError" class="field-error"></small>
+<div id="editAppointmentModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>Edytuj wizyte</h2>
+            <button class="modal-close" onclick="closeEditAppointmentModal()">&times;</button>
         </div>
-        <div class="field-group">
-            <input type="number" id="servicePrice" placeholder="Cena" min="0" step="0.01" required>
-            <small id="servicePriceError" class="field-error"></small>
-        </div>
-        <div class="field-group">
-            <input type="number" id="serviceDuration" placeholder="Czas (min)" min="1" step="1" required>
-            <small id="serviceDurationError" class="field-error"></small>
-        </div>
-        <button type="submit">Dodaj usługę</button>
-    </form>
-
-    <table id="servicesTable">
-        <thead>
-            <tr>
-                <th>ID</th><th>Nazwa</th><th>Cena</th><th>Czas (min)</th><th id="serviceActionsHeader">Akcje</th>
-            </tr>
-        </thead>
-        <tbody></tbody>
-    </table>
-
-    <div id="editServiceModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2>Edytuj usługę</h2>
-                <button class="modal-close" onclick="closeEditServiceModal()">&times;</button>
-            </div>
-            <form id="editServiceForm" class="edit-form">
-                <input type="hidden" id="editServiceId">
-                <input type="text" id="editServiceName" placeholder="Nazwa usługi" required>
-                <small id="editServiceNameError" class="field-error"></small>
-                <input type="number" id="editServicePrice" placeholder="Cena" min="0" step="0.01" required>
-                <small id="editServicePriceError" class="field-error"></small>
-                <input type="number" id="editServiceDuration" placeholder="Czas (min)" min="1" step="1" required>
-                <small id="editServiceDurationError" class="field-error"></small>
-                <button type="submit">Zaktualizuj</button>
-            </form>
-        </div>
-    </div>
-
-    <h2>Zaplanowane Wizyty</h2>
-    <form id="addAppointmentForm" class="appointment-form">
-        <div class="field-group">
-            <input type="text" id="clientName" placeholder="Imię klienta" required>
-            <small id="clientNameError" class="field-error"></small>
-        </div>
-        <div class="field-group">
-            <input type="datetime-local" id="appointmentTime" required>
-            <small id="appointmentTimeError" class="field-error"></small>
-        </div>
-        <div class="field-group">
-            <select id="appointmentService" required>
-                <option value="">Wybierz usługę</option>
+        <form id="editAppointmentForm" class="edit-form">
+            <input type="hidden" id="editAppointmentId">
+            <input type="text" id="editClientName" placeholder="Imie klienta" required>
+            <small id="editClientNameError" class="field-error"></small>
+            <input type="datetime-local" id="editAppointmentTime" required>
+            <small id="editAppointmentTimeError" class="field-error"></small>
+            <select id="editAppointmentService" required>
+                <option value="">Wybierz usluge</option>
             </select>
-            <small id="appointmentServiceError" class="field-error"></small>
-        </div>
-        <div class="field-group">
-            <input type="text" id="appointmentStatus" placeholder="Status" value="NEW" required>
-            <small id="appointmentStatusError" class="field-error"></small>
-        </div>
-        <button type="submit">Dodaj wizytę</button>
-    </form>
+            <small id="editAppointmentServiceError" class="field-error"></small>
+            <input type="text" id="editAppointmentStatus" placeholder="Status" required>
+            <small id="editAppointmentStatusError" class="field-error"></small>
+            <select id="editAppointmentArtist">
+                <option value="">Bez przydzielenia</option>
+                <option value="Natalia Gąsiorowska">Natalia Gąsiorowska</option>
+                <option value="Julian Reed">Julian Reed</option>
+                <option value="Maya Chen">Maya Chen</option>
+            </select>
+            <button type="submit">Zaktualizuj</button>
+        </form>
+    </div>
+</div>
 
-    <table id="appointmentsTable">
-        <thead>
-            <tr>
-                <th>Klient</th><th>Data</th><th>Usługa</th><th>Status</th><th id="appointmentActionsHeader">Akcje</th>
-            </tr>
-        </thead>
-        <tbody></tbody>
-    </table>
-
-    <div id="editAppointmentModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2>Edytuj wizytę</h2>
-                <button class="modal-close" onclick="closeEditAppointmentModal()">&times;</button>
-            </div>
-            <form id="editAppointmentForm" class="edit-form">
-                <input type="hidden" id="editAppointmentId">
-                <input type="text" id="editClientName" placeholder="Imię klienta" required>
-                <small id="editClientNameError" class="field-error"></small>
-                <input type="datetime-local" id="editAppointmentTime" required>
-                <small id="editAppointmentTimeError" class="field-error"></small>
-                <select id="editAppointmentService" required>
-                    <option value="">Wybierz usługę</option>
-                </select>
-                <small id="editAppointmentServiceError" class="field-error"></small>
-                <input type="text" id="editAppointmentStatus" placeholder="Status" required>
-                <small id="editAppointmentStatusError" class="field-error"></small>
-                <button type="submit">Zaktualizuj</button>
-            </form>
+<div id="deleteUserModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>Usun uzytkownika</h2>
+            <button class="modal-close" onclick="closeDeleteUserModal()">&times;</button>
+        </div>
+        <p id="deleteUserModalText">Czy na pewno chcesz usunac uzytkownika?</p>
+        <div class="modal-actions">
+            <button type="button" class="cancel-btn" onclick="closeDeleteUserModal()">Anuluj</button>
+            <button type="button" id="confirmDeleteUserBtn" class="confirm-delete-btn">Usun</button>
         </div>
     </div>
+</div>
 
-    <div id="deleteUserModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2>Usuń użytkownika</h2>
-                <button class="modal-close" onclick="closeDeleteUserModal()">&times;</button>
-            </div>
-            <p id="deleteUserModalText">Czy na pewno chcesz usunąć użytkownika?</p>
-            <div class="modal-actions">
-                <button type="button" class="cancel-btn" onclick="closeDeleteUserModal()">Anuluj</button>
-                <button type="button" id="confirmDeleteUserBtn" class="confirm-delete-btn">Usuń</button>
-            </div>
+<div id="deleteServiceModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>Usun usluge</h2>
+            <button class="modal-close" onclick="closeDeleteServiceModal()">&times;</button>
         </div>
-    </div>
-
-    <div id="deleteServiceModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2>Usuń usługę</h2>
-                <button class="modal-close" onclick="closeDeleteServiceModal()">&times;</button>
-            </div>
-            <p id="deleteServiceModalText">Czy na pewno chcesz usunąć tę usługę?</p>
-            <div class="modal-actions">
-                <button type="button" class="cancel-btn" onclick="closeDeleteServiceModal()">Anuluj</button>
-                <button type="button" id="confirmDeleteServiceBtn" class="confirm-delete-btn">Usuń</button>
-            </div>
+        <p id="deleteServiceModalText">Czy na pewno chcesz usunac te usluge?</p>
+        <div class="modal-actions">
+            <button type="button" class="cancel-btn" onclick="closeDeleteServiceModal()">Anuluj</button>
+            <button type="button" id="confirmDeleteServiceBtn" class="confirm-delete-btn">Usun</button>
         </div>
     </div>
 </div>
@@ -240,6 +1508,75 @@
     let pendingDeleteUsername = null;
     let pendingDeleteServiceId = null;
     let pendingDeleteServiceName = null;
+
+    function clearDashboardData() {
+        document.querySelector('#servicesTable tbody').innerHTML = '';
+        document.querySelector('#appointmentsTable tbody').innerHTML = '';
+        document.querySelector('#usersTable tbody').innerHTML = '';
+    }
+
+    function showDashboardSection(panelId) {
+        document.querySelector('#marketingSection').style.display = 'none';
+        document.querySelector('#dashboardSection').style.display = 'block';
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+
+        if (panelId) {
+            setTimeout(() => {
+                const panel = document.querySelector(`#${panelId}`);
+                if (panel) {
+                    panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            }, 160);
+        }
+    }
+
+    function showMarketingSection(sectionId) {
+        document.querySelector('#dashboardSection').style.display = 'none';
+        document.querySelector('#marketingSection').style.display = 'block';
+        document.querySelector('#mainLandingContent').style.display = 'block';
+        document.querySelector('#stuffSection').style.display = 'none';
+        document.querySelector('#organizationSection').style.display = 'none';
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+
+        if (sectionId) {
+            setTimeout(() => {
+                const section = document.querySelector(`#${sectionId}`);
+                if (section) {
+                    section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            }, 160);
+        }
+    }
+
+    function openRoleMarketingView(viewName) {
+        document.querySelector('#dashboardSection').style.display = 'none';
+        document.querySelector('#marketingSection').style.display = 'block';
+        document.querySelector('#mainLandingContent').style.display = 'none';
+        document.querySelector('#stuffSection').style.display = viewName === 'stuff' ? 'block' : 'none';
+        document.querySelector('#organizationSection').style.display = viewName === 'organization' ? 'block' : 'none';
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function isLoggedIn() {
+        return Boolean(localStorage.getItem('auth_credentials'));
+    }
+
+    function handleTopAuthButton() {
+        if (isLoggedIn()) {
+            logout();
+            showMarketingSection();
+            return;
+        }
+
+        clearDashboardData();
+        showDashboardSection();
+        setTimeout(() => {
+            const usernameInput = document.querySelector('#username');
+            if (usernameInput) {
+                usernameInput.focus();
+            }
+        }, 160);
+    }
 
     function getAuthHeader() {
         const credentials = localStorage.getItem('auth_credentials');
@@ -255,14 +1592,18 @@
         return localStorage.getItem('role');
     }
 
-    function canModifyData() {
+    function canManageAppointments() {
         const role = getCurrentRole();
         return role === 'ADMIN' || role === 'OWNER' || role === 'STAFF';
     }
 
-    function canDeleteServices() {
+    function canManageServices() {
         const role = getCurrentRole();
         return role === 'ADMIN' || role === 'OWNER';
+    }
+
+    function canDeleteServices() {
+        return canManageServices();
     }
 
     function canManageUsers() {
@@ -270,16 +1611,90 @@
         return role === 'ADMIN' || role === 'OWNER';
     }
 
+    function canAccessStuffArea() {
+        return canManageAppointments();
+    }
+
+    function canAccessOrganizationArea() {
+        return canManageServices();
+    }
+
+    function canAccessCustomerBooking() {
+        const role = getCurrentRole();
+        return role === 'CUSTOMER' || role === 'OWNER' || role === 'ADMIN';
+    }
+
+    function formatServiceCategory(category) {
+        if (category === 'LASHES') {
+            return 'Lashes';
+        }
+        if (category === 'SKIN') {
+            return 'Skin';
+        }
+        return 'Nails';
+    }
+
+    function formatStatusClass(status) {
+        return String(status || '')
+            .toLowerCase()
+            .replace(/[^a-z0-9]+/g, '-');
+    }
+
+    function updateTopNavigationUI() {
+        const topAuthButton = document.querySelector('#topAuthButton');
+        const bookingButton = document.querySelector('#navBookingButton');
+        const stuffButton = document.querySelector('#navStuffButton');
+        const organizationButton = document.querySelector('#navOrganizationButton');
+        if (topAuthButton) {
+            topAuthButton.textContent = isLoggedIn() ? 'Wyloguj' : 'Zaloguj';
+        }
+
+        if (bookingButton) {
+            bookingButton.style.display = canAccessCustomerBooking() ? 'inline-flex' : 'none';
+        }
+
+        if (stuffButton) {
+            stuffButton.style.display = canAccessStuffArea() ? 'inline-flex' : 'none';
+        }
+
+        if (organizationButton) {
+            organizationButton.style.display = canAccessOrganizationArea() ? 'inline-flex' : 'none';
+        }
+
+        if (!canAccessStuffArea() && !canAccessOrganizationArea()) {
+            showMarketingSection();
+        }
+    }
+
+    function updateAuthSectionUI() {
+        const loggedIn = isLoggedIn();
+        const loginControls = document.querySelector('#loginControls');
+        const userInfo = document.querySelector('#userInfo');
+
+        if (loginControls) {
+            loginControls.style.display = loggedIn ? 'none' : 'flex';
+        }
+
+        if (userInfo) {
+            userInfo.style.display = loggedIn ? 'block' : 'none';
+        }
+    }
+
     function updatePermissionUI() {
-        const canWrite = canModifyData();
+        const canAppointments = canManageAppointments();
+        const canServices = canManageServices();
         const canManage = canManageUsers();
         const role = getCurrentRole();
 
-        document.querySelector('#addServiceForm').style.display = canWrite ? 'flex' : 'none';
-        document.querySelector('#addAppointmentForm').style.display = canWrite ? 'flex' : 'none';
-        document.querySelector('#serviceActionsHeader').style.display = canWrite ? 'table-cell' : 'none';
-        document.querySelector('#appointmentActionsHeader').style.display = canWrite ? 'table-cell' : 'none';
+        document.querySelector('#addServiceForm').style.display = canServices ? 'flex' : 'none';
+        document.querySelector('#addAppointmentForm').style.display = canAppointments ? 'flex' : 'none';
+        document.querySelector('#serviceActionsHeader').style.display = canServices ? 'table-cell' : 'none';
+        document.querySelector('#appointmentActionsHeader').style.display = canAppointments ? 'table-cell' : 'none';
+        document.querySelector('#servicesPanel').style.display = canServices ? 'block' : 'none';
+        document.querySelector('#appointmentsPanel').style.display = canAppointments ? 'block' : 'none';
         document.querySelector('#usersManagementSection').style.display = canManage ? 'block' : 'none';
+        updateTopNavigationUI();
+        updateAuthSectionUI();
 
         const authMessage = document.querySelector('#authMessage');
         if (!role) {
@@ -287,7 +1702,17 @@
             return;
         }
 
-        if (!canWrite) {
+        if (canManage) {
+            authMessage.textContent = `Rola ${role}: dostęp do sekcji Stuff i Organization.`;
+            return;
+        }
+
+        if (canAppointments) {
+            authMessage.textContent = `Rola ${role}: dostęp do sekcji Stuff (wizyty).`;
+            return;
+        }
+
+        if (!canAppointments) {
             authMessage.textContent = `Rola ${role}: tylko podgląd (bez dodawania, edycji i usuwania).`;
             return;
         }
@@ -370,6 +1795,7 @@
         updatePermissionUI();
         await loadData();
         await loadUsers();
+        showMarketingSection();
     }
 
     function logout() {
@@ -386,7 +1812,6 @@
         document.querySelector('#usersTable tbody').innerHTML = '';
         updatePermissionUI();
         applyCreateRoleOptions();
-        loadData();
     }
 
     async function checkAuthStatus() {
@@ -406,8 +1831,13 @@
         }
 
         updatePermissionUI();
-        await loadData();
-        await loadUsers();
+        if (isLoggedIn()) {
+            await loadData();
+            await loadUsers();
+            return;
+        }
+
+        clearDashboardData();
     }
 
     async function handleAuthResponse(response) {
@@ -541,7 +1971,8 @@
 
     // ===== Load Data =====
     async function loadData() {
-        const canWrite = canModifyData();
+        const canAppointments = canManageAppointments();
+        const canServices = canManageServices();
         const canDeleteService = canDeleteServices();
 
         // Get Services
@@ -555,9 +1986,17 @@
             <tr>
                 <td>${s.id}</td>
                 <td>${s.name}</td>
+                <td><span class="meta-pill">${formatServiceCategory(s.category)}</span></td>
                 <td>${s.price} zł</td>
                 <td>${s.duration}</td>
-                <td>${canWrite || canDeleteService ? `${canWrite ? `<button type="button" class="edit-service-btn" data-id="${s.id}" data-name="${s.name}" data-price="${s.price}" data-duration="${s.duration}" style="background: #ffc107; color: black; border: none; padding: 5px 10px; cursor: pointer; border-radius: 3px; margin-right: 5px;">Edytuj</button>` : ''}${canDeleteService ? `<button type="button" class="delete-service-btn" data-id="${s.id}" data-name="${s.name}" style="background: #dc3545; color: white; border: none; padding: 5px 10px; cursor: pointer; border-radius: 3px;">Usuń</button>` : ''}` : ''}</td>
+                <td>
+                    ${canServices || canDeleteService ? `
+                        <div class="action-inline">
+                            ${canServices ? `<button type="button" class="edit-service-btn" data-id="${s.id}" data-name="${s.name}" data-category="${s.category || 'NAILS'}" data-price="${s.price}" data-duration="${s.duration}">Edytuj</button>` : ''}
+                            ${canDeleteService ? `<button type="button" class="delete-service-btn" data-id="${s.id}" data-name="${s.name}">Usuń</button>` : ''}
+                        </div>
+                    ` : ''}
+                </td>
             </tr>
         `).join('');
         
@@ -577,10 +2016,273 @@
                 <td>${a.clientName}</td>
                 <td>${new Date(a.appointmentTime).toLocaleString()}</td>
                 <td>${a.service ? a.service.name : 'Brak'}</td>
-                <td>${a.status}</td>
-                <td>${canWrite ? `<button type="button" class="edit-appointment-btn" data-id="${a.id}" data-client="${a.clientName}" data-time="${a.appointmentTime}" data-service="${a.service?.id || ''}" data-status="${a.status}" style="background: #ffc107; color: black; border: none; padding: 5px 10px; cursor: pointer; border-radius: 3px; margin-right: 5px;">Edytuj</button><button type="button" class="delete-btn" data-id="${a.id}" style="background: #dc3545; color: white; border: none; padding: 5px 10px; cursor: pointer; border-radius: 3px;">Usuń</button>` : ''}</td>
+                <td><span class="status-pill status-${formatStatusClass(a.status)}">${a.status}</span></td>
+                <td>
+                    ${canAppointments ? `
+                        <div class="action-inline">
+                            <button type="button" class="edit-appointment-btn" data-id="${a.id}" data-client="${a.clientName}" data-time="${a.appointmentTime}" data-service="${a.service?.id || ''}" data-status="${a.status}" data-artist="${a.artist || ''}">Edytuj</button>
+                            <button type="button" class="delete-btn" data-id="${a.id}">Usuń</button>
+                        </div>
+                    ` : ''}
+                </td>
             </tr>
         `).join('');
+        
+        // Render calendar with appointments
+        renderCalendar(apps);
+
+        // Initialize calendar to show today's appointments
+        setTimeout(() => {
+            const today = new Date();
+            const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+            const todayAppointments = window.allAppointments.filter(app => {
+                const appDate = new Date(app.appointmentTime);
+                const appDateStr = `${appDate.getFullYear()}-${String(appDate.getMonth() + 1).padStart(2, '0')}-${String(appDate.getDate()).padStart(2, '0')}`;
+                return appDateStr === todayStr;
+            });
+            selectCalendarDay(todayStr, today.getDate(), today.getMonth(), today.getFullYear(), todayAppointments);
+        }, 100);
+    }
+
+    // ===== Calendar Functions =====
+    let currentCalendarDate = new Date();
+    let selectedCalendarAppointment = null;
+    window.allAppointments = [];
+
+    function formatLocalDateKey(value) {
+        const date = new Date(value);
+        return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+    }
+
+    function renderCalendar(appointments) {
+        window.allAppointments = appointments;
+        const grid = document.querySelector('#calendarGrid');
+        const monthYearEl = document.querySelector('#calendarMonthYear');
+        
+        if (!grid) return;
+
+        grid.innerHTML = '';
+
+        // Day headers
+        const dayNames = ['Pon', 'Wto', 'Śro', 'Czw', 'Pią', 'Sob', 'Nie'];
+        dayNames.forEach(day => {
+            const header = document.createElement('div');
+            header.className = 'calendar-day-header';
+            header.textContent = day;
+            grid.appendChild(header);
+        });
+
+        const monthNames = ['Styczeń', 'Luty', 'Marzec', 'Kwiecień', 'Maj', 'Czerwiec', 'Lipiec', 'Sierpień', 'Wrzesień', 'Październik', 'Listopad', 'Grudzień'];
+        monthYearEl.textContent = `${monthNames[currentCalendarDate.getMonth()]} ${currentCalendarDate.getFullYear()}`;
+
+        const year = currentCalendarDate.getFullYear();
+        const month = currentCalendarDate.getMonth();
+        const firstDay = new Date(year, month, 1).getDay();
+        const lastDay = new Date(year, month + 1, 0).getDate();
+        const prevLastDay = new Date(year, month, 0).getDate();
+
+        // Previous month days
+        for (let i = firstDay === 0 ? 6 : firstDay - 1; i > 0; i--) {
+            const dayEl = document.createElement('div');
+            dayEl.className = 'calendar-day other-month';
+            dayEl.innerHTML = `<div class="calendar-day-number">${prevLastDay - i + 1}</div>`;
+            grid.appendChild(dayEl);
+        }
+
+        // Current month days
+        const today = new Date();
+        const todayDateStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+
+        for (let day = 1; day <= lastDay; day++) {
+            const dayEl = document.createElement('div');
+            dayEl.className = 'calendar-day';
+
+            const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+            
+            if (dateStr === todayDateStr) {
+                dayEl.classList.add('today');
+            }
+
+            const dayNumber = document.createElement('div');
+            dayNumber.className = 'calendar-day-number';
+            dayNumber.textContent = day;
+            dayEl.appendChild(dayNumber);
+
+            // Add appointments for this day
+            const dayAppointments = appointments.filter(app => {
+                const appDate = formatLocalDateKey(app.appointmentTime);
+                return appDate === dateStr;
+            });
+
+            dayAppointments.forEach(app => {
+                const appEl = document.createElement('div');
+                appEl.className = 'calendar-appointment-item';
+                appEl.textContent = app.clientName;
+                appEl.onclick = (e) => {
+                    e.stopPropagation();
+                    showCalendarAppointmentDetails(app);
+                };
+                dayEl.appendChild(appEl);
+            });
+
+            // Add click handler to select day
+            dayEl.onclick = () => selectCalendarDay(dateStr, day, month, year, dayAppointments);
+
+            grid.appendChild(dayEl);
+        }
+
+        // Next month days
+        const totalCells = grid.querySelectorAll('.calendar-day, .calendar-day-header').length - dayNames.length;
+        const remainingCells = 42 - totalCells;
+        for (let day = 1; day <= remainingCells; day++) {
+            const dayEl = document.createElement('div');
+            dayEl.className = 'calendar-day other-month';
+            dayEl.innerHTML = `<div class="calendar-day-number">${day}</div>`;
+            grid.appendChild(dayEl);
+        }
+    }
+
+    let selectedDayData = null;
+
+    function selectCalendarDay(dateStr, day, month, year, dayAppointments) {
+        selectedDayData = {
+            dateStr,
+            day,
+            month,
+            year,
+            appointments: dayAppointments
+        };
+
+        // Remove previous selection
+        document.querySelectorAll('.calendar-day.selected').forEach(el => {
+            el.classList.remove('selected');
+        });
+
+        // Mark day as selected
+        const dayElements = document.querySelectorAll('.calendar-day');
+        dayElements.forEach(el => {
+            const dayNum = el.querySelector('.calendar-day-number');
+            if (dayNum && dayNum.textContent === String(day) && !el.classList.contains('other-month')) {
+                el.classList.add('selected');
+            }
+        });
+
+        // Show day details panel
+        const detailsPanel = document.querySelector('#dayDetailsPanel');
+        detailsPanel.classList.add('show');
+
+        // Update day details header
+        const monthNames = ['Styczeń', 'Luty', 'Marzec', 'Kwiecień', 'Maj', 'Czerwiec', 'Lipiec', 'Sierpień', 'Wrzesień', 'Październik', 'Listopad', 'Grudzień'];
+        const dayNames = ['Niedziela', 'Poniedziałek', 'Wtorek', 'Środa', 'Czwartek', 'Piątek', 'Sobota'];
+        const date = new Date(year, month, day);
+        
+        document.querySelector('#selectedDayTitle').textContent = `${dayNames[date.getDay()]}, ${day} ${monthNames[month]}`;
+        document.querySelector('#selectedDayDate').textContent = dateStr;
+
+        // Reset employee filter and display appointments
+        document.querySelector('#employeeFilter').value = '';
+        updateDayAppointmentsDisplay();
+    }
+
+    function updateDayAppointmentsDisplay() {
+        if (!selectedDayData) return;
+
+        const filterValue = document.querySelector('#employeeFilter').value;
+        let filteredAppointments = selectedDayData.appointments;
+
+        // Filter by employee if selected
+        if (filterValue) {
+            filteredAppointments = filteredAppointments.filter(app => app.artist === filterValue);
+        }
+
+        // Display appointments
+        const appointmentsList = document.querySelector('#dayAppointmentsList');
+        
+        if (filteredAppointments.length === 0) {
+            appointmentsList.innerHTML = '<div class="no-appointments">Brak wizyt w wybranym dniu</div>';
+            return;
+        }
+
+        appointmentsList.innerHTML = filteredAppointments.map(app => `
+            <div class="appointment-card">
+                <h4>${app.clientName}</h4>
+                <p><strong>Czas:</strong> ${new Date(app.appointmentTime).toLocaleTimeString('pl-PL', { hour: '2-digit', minute: '2-digit' })}</p>
+                <p><strong>Usługa:</strong> ${app.service ? app.service.name : 'Brak usługi'}</p>
+                ${app.artist ? `<p><strong>Pracownik:</strong> ${app.artist}</p>` : ''}
+                <p><strong>Status:</strong> ${app.status}</p>
+            </div>
+        `).join('');
+    }
+
+    function calendarPreviousMonth() {
+        currentCalendarDate.setMonth(currentCalendarDate.getMonth() - 1);
+        renderCalendar(window.allAppointments);
+    }
+
+    function calendarNextMonth() {
+        currentCalendarDate.setMonth(currentCalendarDate.getMonth() + 1);
+        renderCalendar(window.allAppointments);
+    }
+
+    function showCalendarAppointmentDetails(appointment) {
+        selectedCalendarAppointment = appointment;
+        const card = document.querySelector('#appointmentDetailsCard');
+        
+        document.querySelector('#detailsClientName').textContent = appointment.clientName;
+        document.querySelector('#detailsTime').textContent = new Date(appointment.appointmentTime).toLocaleString('pl-PL');
+        document.querySelector('#detailsService').textContent = appointment.service ? appointment.service.name : 'Brak usługi';
+        document.querySelector('#detailsStatus').textContent = appointment.status;
+        document.querySelector('#calendarArtistSelect').value = appointment.artist || '';
+        
+        card.classList.add('show');
+    }
+
+    async function saveCalendarArtistAssignment() {
+        if (!selectedCalendarAppointment) {
+            alert('Nie wybrano wizyty');
+            return;
+        }
+
+        if (!canManageAppointments()) {
+            alert('Brak uprawnień do przydzielania pracownika.');
+            return;
+        }
+
+        const artist = document.querySelector('#calendarArtistSelect').value.trim();
+        const authHeaders = getAuthHeader();
+        const response = await fetch(`http://localhost:8081/api/appointments/${selectedCalendarAppointment.id}`, {
+            method: 'PATCH',
+            headers: {
+                'Content-Type': 'application/json',
+                ...authHeaders
+            },
+            body: JSON.stringify({
+                clientName: selectedCalendarAppointment.clientName,
+                appointmentTime: selectedCalendarAppointment.appointmentTime,
+                status: selectedCalendarAppointment.status,
+                serviceId: selectedCalendarAppointment.service?.id,
+                artist
+            })
+        });
+
+        if (!response.ok) {
+            if (await handleAuthResponse(response)) {
+                return;
+            }
+
+            const errorBody = await parseErrorResponse(response);
+            if (response.status === 400 && errorBody?.errors) {
+                alert(Object.values(errorBody.errors).join('\n'));
+                return;
+            }
+
+            alert('Nie udało się zapisać przydziału pracownika.');
+            return;
+        }
+
+        selectedCalendarAppointment.artist = artist || null;
+        alert(`Przydzielono: ${artist || 'brak przydzielenia'} do wizyty klienta ${selectedCalendarAppointment.clientName}`);
+        await loadData();
     }
 
     // ===== Modal Functions =====
@@ -852,23 +2554,25 @@
     document.querySelector('#addServiceForm').addEventListener('submit', async (event) => {
         event.preventDefault();
 
-        if (!canModifyData()) {
+        if (!canManageServices()) {
             alert('Brak uprawnień do dodawania usług.');
             return;
         }
 
         const serviceErrorMapping = {
             name: { errorId: 'serviceNameError', inputSelector: '#serviceName' },
+            category: { errorId: 'serviceCategoryError', inputSelector: '#serviceCategory' },
             price: { errorId: 'servicePriceError', inputSelector: '#servicePrice' },
             duration: { errorId: 'serviceDurationError', inputSelector: '#serviceDuration' }
         };
         clearFieldErrors(serviceErrorMapping);
 
         const name = document.querySelector('#serviceName').value.trim();
+        const category = document.querySelector('#serviceCategory').value;
         const price = Number(document.querySelector('#servicePrice').value);
         const duration = Number(document.querySelector('#serviceDuration').value);
 
-        if (!name || Number.isNaN(price) || Number.isNaN(duration)) {
+        if (!name || !category || Number.isNaN(price) || Number.isNaN(duration)) {
             alert('Uzupełnij poprawnie wszystkie pola usługi.');
             return;
         }
@@ -882,6 +2586,7 @@
             },
             body: JSON.stringify({
                 name,
+                category,
                 price,
                 duration,
                 description: ''
@@ -929,18 +2634,20 @@
             return;
         }
 
-        if (!canModifyData()) {
+        if (!canManageServices()) {
             alert('Brak uprawnień do edycji usług.');
             return;
         }
 
         const id = editBtn.dataset.id;
         const name = editBtn.dataset.name;
+        const category = editBtn.dataset.category;
         const price = editBtn.dataset.price;
         const duration = editBtn.dataset.duration;
 
         document.querySelector('#editServiceId').value = id;
         document.querySelector('#editServiceName').value = name;
+        document.querySelector('#editServiceCategory').value = category || 'NAILS';
         document.querySelector('#editServicePrice').value = price;
         document.querySelector('#editServiceDuration').value = duration;
 
@@ -951,13 +2658,14 @@
     document.querySelector('#editServiceForm').addEventListener('submit', async (event) => {
         event.preventDefault();
 
-        if (!canModifyData()) {
+        if (!canManageServices()) {
             alert('Brak uprawnień do edycji usług.');
             return;
         }
 
         const serviceErrorMapping = {
             name: { errorId: 'editServiceNameError', inputSelector: '#editServiceName' },
+            category: { errorId: 'editServiceCategoryError', inputSelector: '#editServiceCategory' },
             price: { errorId: 'editServicePriceError', inputSelector: '#editServicePrice' },
             duration: { errorId: 'editServiceDurationError', inputSelector: '#editServiceDuration' }
         };
@@ -965,10 +2673,11 @@
 
         const id = document.querySelector('#editServiceId').value;
         const name = document.querySelector('#editServiceName').value.trim();
+        const category = document.querySelector('#editServiceCategory').value;
         const price = Number(document.querySelector('#editServicePrice').value);
         const duration = Number(document.querySelector('#editServiceDuration').value);
 
-        if (!name || Number.isNaN(price) || Number.isNaN(duration)) {
+        if (!name || !category || Number.isNaN(price) || Number.isNaN(duration)) {
             alert('Uzupełnij poprawnie wszystkie pola usługi.');
             return;
         }
@@ -982,6 +2691,7 @@
             },
             body: JSON.stringify({
                 name,
+                category,
                 price,
                 duration,
                 description: ''
@@ -1010,7 +2720,7 @@
     document.querySelector('#addAppointmentForm').addEventListener('submit', async (event) => {
         event.preventDefault();
 
-        if (!canModifyData()) {
+        if (!canManageAppointments()) {
             alert('Brak uprawnień do dodawania wizyt.');
             return;
         }
@@ -1027,6 +2737,7 @@
         const appointmentTime = document.querySelector('#appointmentTime').value;
         const serviceId = Number(document.querySelector('#appointmentService').value);
         const status = document.querySelector('#appointmentStatus').value.trim();
+        const artist = document.querySelector('#appointmentArtist').value.trim();
 
         if (!clientName || !appointmentTime || Number.isNaN(serviceId) || !status) {
             alert('Uzupełnij poprawnie wszystkie pola wizyty.');
@@ -1044,7 +2755,8 @@
                 clientName,
                 appointmentTime,
                 status,
-                serviceId
+                serviceId,
+                artist
             })
         });
 
@@ -1064,6 +2776,7 @@
 
         event.target.reset();
         document.querySelector('#appointmentStatus').value = 'NEW';
+        document.querySelector('#appointmentArtist').value = '';
         loadData();
     });
 
@@ -1074,7 +2787,7 @@
             return;
         }
 
-        if (!canModifyData()) {
+        if (!canManageAppointments()) {
             alert('Brak uprawnień do edycji wizyt.');
             return;
         }
@@ -1084,12 +2797,14 @@
         const appointmentTime = editBtn.dataset.time;
         const serviceId = editBtn.dataset.service;
         const status = editBtn.dataset.status;
+        const artist = editBtn.dataset.artist || '';
 
         document.querySelector('#editAppointmentId').value = id;
         document.querySelector('#editClientName').value = clientName;
         document.querySelector('#editAppointmentTime').value = appointmentTime;
         document.querySelector('#editAppointmentService').value = serviceId;
         document.querySelector('#editAppointmentStatus').value = status;
+        document.querySelector('#editAppointmentArtist').value = artist;
 
         document.querySelector('#editAppointmentModal').classList.add('show');
     });
@@ -1098,7 +2813,7 @@
     document.querySelector('#editAppointmentForm').addEventListener('submit', async (event) => {
         event.preventDefault();
 
-        if (!canModifyData()) {
+        if (!canManageAppointments()) {
             alert('Brak uprawnień do edycji wizyt.');
             return;
         }
@@ -1116,6 +2831,7 @@
         const appointmentTime = document.querySelector('#editAppointmentTime').value;
         const serviceId = Number(document.querySelector('#editAppointmentService').value);
         const status = document.querySelector('#editAppointmentStatus').value.trim();
+        const artist = document.querySelector('#editAppointmentArtist').value.trim();
 
         if (!clientName || !appointmentTime || Number.isNaN(serviceId) || !status) {
             alert('Uzupełnij poprawnie wszystkie pola wizyty.');
@@ -1133,7 +2849,8 @@
                 clientName,
                 appointmentTime,
                 status,
-                serviceId
+                serviceId,
+                artist
             })
         });
 
@@ -1162,7 +2879,7 @@
             return;
         }
 
-        if (!canModifyData()) {
+        if (!canManageAppointments()) {
             alert('Brak uprawnień do usuwania wizyt.');
             return;
         }
@@ -1211,6 +2928,17 @@
 
     // ===== Initialize =====
     checkAuthStatus();
+
+    // Handle view parameter from booking.html navigation
+    const urlParams = new URLSearchParams(window.location.search);
+    const viewParam = urlParams.get('view');
+    if (viewParam === 'stuff' || viewParam === 'organization') {
+        setTimeout(() => {
+            openRoleMarketingView(viewParam);
+        }, 100);
+        // Clean up URL
+        window.history.replaceState({}, document.title, window.location.pathname);
+    }
 </script>
 
 </body>

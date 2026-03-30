@@ -18,6 +18,8 @@ public class Appointment {
 
     private String status;
 
+    private String artist;
+
     @ManyToOne // Many appointments can be associated with one service
     @JoinColumn(name = "service_id") // Foreign key column in the appointments table
     private Service service;

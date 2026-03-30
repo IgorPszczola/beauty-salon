@@ -43,6 +43,7 @@ public class AppointmentController {
         appointment.setClientName(request.getClientName());
         appointment.setAppointmentTime(request.getAppointmentTime());
         appointment.setStatus(request.getStatus());
+        appointment.setArtist(normalizeArtist(request.getArtist()));
         appointment.setService(service);
 
         Appointment savedAppointment = appointmentRepository.save(appointment);
@@ -60,6 +61,7 @@ public class AppointmentController {
         appointment.setClientName(request.getClientName());
         appointment.setAppointmentTime(request.getAppointmentTime());
         appointment.setStatus(request.getStatus());
+        appointment.setArtist(normalizeArtist(request.getArtist()));
         appointment.setService(service);
 
         Appointment updatedAppointment = appointmentRepository.save(appointment);
@@ -92,7 +94,17 @@ public class AppointmentController {
                 appointment.getClientName(),
                 appointment.getAppointmentTime(),
                 appointment.getStatus(),
+                appointment.getArtist(),
                 serviceResponse
         );
+    }
+
+    private String normalizeArtist(String artist) {
+        if (artist == null) {
+            return null;
+        }
+
+        String trimmed = artist.trim();
+        return trimmed.isEmpty() ? null : trimmed;
     }
 }

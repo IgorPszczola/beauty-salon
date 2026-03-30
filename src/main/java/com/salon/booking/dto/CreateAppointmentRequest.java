@@ -22,4 +22,7 @@ public class CreateAppointmentRequest {
 
     @NotNull(message = "Service selection is required")
     private Long serviceId;
+
+    @Size(max = 120, message = "Artist must be at most 120 characters")
+    private String artist;
 }

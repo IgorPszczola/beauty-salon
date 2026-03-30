@@ -3,6 +3,7 @@ package com.salon.booking;
 import com.salon.booking.model.Appointment;
 import com.salon.booking.model.AppUser;
 import com.salon.booking.model.Service;
+import com.salon.booking.model.ServiceCategory;
 import com.salon.booking.repository.AppUserRepository;
 import com.salon.booking.repository.AppointmentRepository;
 import com.salon.booking.repository.ServiceRepository;
@@ -231,6 +232,7 @@ class ServiceDeleteIntegrationTest {
         service.setDescription("Integration test service");
         service.setPrice(120.0);
         service.setDuration(60);
+        service.setCategory(ServiceCategory.NAILS);
         return serviceRepository.save(service);
     }
 
