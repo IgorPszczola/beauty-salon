@@ -993,6 +993,7 @@
             const submitButton = document.querySelector('#submitBookingBtn');
             const clientName = document.querySelector('#clientName').value.trim();
             const appointmentTime = state.selectedDateTime;
+            const artist = (state.selectedArtist || '').trim();
 
             if (!state.selectedServiceId || !clientName || !appointmentTime) {
                 statusNode.className = 'status-message error';
@@ -1016,7 +1017,8 @@
                         clientName,
                         appointmentTime,
                         status: 'NEW',
-                        serviceId: state.selectedServiceId
+                        serviceId: state.selectedServiceId,
+                        artist
                     })
                 });
 
