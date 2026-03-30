@@ -698,6 +698,10 @@
         selectedDateTime: ''
     };
 
+    function isCustomerRole() {
+        return getCurrentRole() === 'CUSTOMER';
+    }
+
     function getCurrentRole() {
         return localStorage.getItem('role');
     }
@@ -849,14 +853,26 @@
 
     function pickDefaultDateTime() {
         const input = document.querySelector('#appointmentDateTime');
+        const selectedSlot = document.querySelector('.time-pill.active')?.dataset.time || '11:00';
         const now = new Date();
         now.setDate(now.getDate() + 1);
-        now.setHours(11, 0, 0, 0);
-        const timezoneAdjusted = new Date(now.getTime() - now.getTimezoneOffset() * 60000)
-            .toISOString()
-            .slice(0, 16);
-        input.value = timezoneAdjusted;
-        state.selectedDateTime = input.value;
+
+        const defaultDate = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+
+        if (isCustomerRole()) {
+            input.type = 'date';
+            input.value = defaultDate;
+            state.selectedDateTime = `${defaultDate}T${selectedSlot}`;
+        } else {
+            now.setHours(11, 0, 0, 0);
+            const timezoneAdjusted = new Date(now.getTime() - now.getTimezoneOffset() * 60000)
+                .toISOString()
+                .slice(0, 16);
+            input.type = 'datetime-local';
+            input.value = timezoneAdjusted;
+            state.selectedDateTime = input.value;
+        }
+
         updateSummary();
     }
 
@@ -910,7 +926,19 @@
         });
 
         document.querySelector('#appointmentDateTime').addEventListener('change', event => {
-            state.selectedDateTime = event.target.value;
+            const selectedValue = event.target.value;
+            if (!selectedValue) {
+                state.selectedDateTime = '';
+                updateSummary();
+                return;
+            }
+
+            if (isCustomerRole()) {
+                const selectedSlot = document.querySelector('.time-pill.active')?.dataset.time || '11:00';
+                state.selectedDateTime = `${selectedValue}T${selectedSlot}`;
+            } else {
+                state.selectedDateTime = selectedValue;
+            }
             updateSummary();
         });
 
@@ -926,14 +954,19 @@
                 pickDefaultDateTime();
             }
 
-            const [hours, minutes] = pill.dataset.time.split(':').map(Number);
-            const selectedDate = new Date(dateInput.value);
-            selectedDate.setHours(hours, minutes, 0, 0);
-            const timezoneAdjusted = new Date(selectedDate.getTime() - selectedDate.getTimezoneOffset() * 60000)
-                .toISOString()
-                .slice(0, 16);
-            dateInput.value = timezoneAdjusted;
-            state.selectedDateTime = dateInput.value;
+            if (isCustomerRole()) {
+                state.selectedDateTime = `${dateInput.value}T${pill.dataset.time}`;
+            } else {
+                const [hours, minutes] = pill.dataset.time.split(':').map(Number);
+                const selectedDate = new Date(dateInput.value);
+                selectedDate.setHours(hours, minutes, 0, 0);
+                const timezoneAdjusted = new Date(selectedDate.getTime() - selectedDate.getTimezoneOffset() * 60000)
+                    .toISOString()
+                    .slice(0, 16);
+                dateInput.value = timezoneAdjusted;
+                state.selectedDateTime = dateInput.value;
+            }
+
             updateSummary();
         });
 
@@ -943,7 +976,7 @@
             const statusNode = document.querySelector('#bookingStatus');
             const submitButton = document.querySelector('#submitBookingBtn');
             const clientName = document.querySelector('#clientName').value.trim();
-            const appointmentTime = document.querySelector('#appointmentDateTime').value;
+            const appointmentTime = state.selectedDateTime;
 
             if (!state.selectedServiceId || !clientName || !appointmentTime) {
                 statusNode.className = 'status-message error';

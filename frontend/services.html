@@ -54,9 +54,9 @@
         }
 
         .nav-inner {
-            display: flex;
+            display: grid;
+            grid-template-columns: minmax(140px, 1fr) auto minmax(140px, 1fr);
             align-items: center;
-            justify-content: space-between;
             gap: 1rem;
             padding: 1rem 0;
         }
@@ -70,6 +70,7 @@
             font-style: italic;
             font-size: 1.45rem;
             padding: 0;
+            justify-self: start;
         }
 
         .nav-center {
@@ -77,6 +78,11 @@
             gap: 1rem;
             align-items: center;
             flex-wrap: wrap;
+            justify-self: center;
+        }
+
+        #logoutButton {
+            justify-self: end;
         }
 
         .nav-center a {
