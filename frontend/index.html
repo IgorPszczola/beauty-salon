@@ -907,7 +907,7 @@
             <button type="button" id="navOrganizationButton" style="display: none;" onclick="openRoleMarketingView('organization')">Organization</button>
         </div>
         <div class="nav-actions">
-            <button id="topAuthButton" class="nav-link-btn top-auth-btn" onclick="handleTopAuthButton()">Logowanie</button>
+            <button id="topAuthButton" class="nav-link-btn top-auth-btn" onclick="handleTopAuthButton()">Zaloguj</button>
         </div>
     </div>
 </header>
@@ -1235,7 +1235,7 @@
         <div class="dashboard-head-top">
             <div>
                 <span class="eyebrow">Management Suite</span>
-                <h1>BeeNails Logowanie</h1>
+                <h1>BeeNails Zaloguj</h1>
                 <div id="authMessage"></div>
             </div>
             <div class="nav-actions">
@@ -1256,7 +1256,7 @@
         </div>
     </div>
 
-    <div class="footer-wrap">BeeNails | Logowanie</div>
+    <div class="footer-wrap">BeeNails | Zaloguj</div>
 </section>
 
 <div id="editServiceModal" class="modal">
@@ -1479,7 +1479,7 @@
         const stuffButton = document.querySelector('#navStuffButton');
         const organizationButton = document.querySelector('#navOrganizationButton');
         if (topAuthButton) {
-            topAuthButton.textContent = isLoggedIn() ? 'Wyloguj' : 'Logowanie';
+            topAuthButton.textContent = isLoggedIn() ? 'Wyloguj' : 'Zaloguj';
         }
 
         if (bookingButton) {

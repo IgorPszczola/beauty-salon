@@ -81,8 +81,10 @@
             justify-self: center;
         }
 
+        #loginButton,
         #logoutButton {
             justify-self: end;
+            width: auto;
         }
 
         .nav-center a {
@@ -365,6 +367,7 @@
             <button type="button" id="navStuffButton" style="display: none; border: 0; background: transparent; color: inherit; cursor: pointer; font-family: inherit; font-size: inherit; padding: 0;" onclick="navigateToSection('stuff')">Stuff</button>
             <button type="button" id="navOrganizationButton" style="display: none; border: 0; background: transparent; color: inherit; cursor: pointer; font-family: inherit; font-size: inherit; padding: 0;" onclick="navigateToSection('organization')">Organization</button>
         </nav>
+        <button type="button" class="hero-btn" id="loginButton" onclick="window.location.href='index.html'" style="display: none;">Zaloguj</button>
         <button type="button" class="hero-btn" id="logoutButton" onclick="logout()" style="display: none;">Wyloguj</button>
     </div>
 </header>
@@ -627,9 +630,16 @@
     }
 
     function updateLogoutButtonVisibility() {
+        const loginButton = document.querySelector('#loginButton');
         const logoutButton = document.querySelector('#logoutButton');
+        const isLoggedIn = Boolean(localStorage.getItem('auth_credentials'));
+
+        if (loginButton) {
+            loginButton.style.display = isLoggedIn ? 'none' : 'inline-block';
+        }
+
         if (logoutButton) {
-            logoutButton.style.display = localStorage.getItem('auth_credentials') ? 'inline-block' : 'none';
+            logoutButton.style.display = isLoggedIn ? 'inline-block' : 'none';
         }
     }
 

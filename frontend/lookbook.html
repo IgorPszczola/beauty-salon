@@ -78,8 +78,10 @@
             justify-self: center;
         }
 
+        #loginButton,
         #logoutButton {
             justify-self: end;
+            width: auto;
         }
 
         .nav-center a,
@@ -429,6 +431,7 @@
             <button type="button" id="navStuffButton" style="display: none;" onclick="navigateToSection('stuff')">Stuff</button>
             <button type="button" id="navOrganizationButton" style="display: none;" onclick="navigateToSection('organization')">Organization</button>
         </nav>
+        <button type="button" class="hero-btn" id="loginButton" onclick="window.location.href='index.html'" style="display: none;">Zaloguj</button>
         <button type="button" class="hero-btn" id="logoutButton" onclick="logout()" style="display: none;">Wyloguj</button>
     </div>
 </header>
@@ -499,9 +502,16 @@
     }
 
     function updateLogoutButtonVisibility() {
+        const loginButton = document.querySelector('#loginButton');
         const logoutButton = document.querySelector('#logoutButton');
+        const isLoggedIn = Boolean(localStorage.getItem('auth_credentials'));
+
+        if (loginButton) {
+            loginButton.style.display = isLoggedIn ? 'none' : 'inline-block';
+        }
+
         if (logoutButton) {
-            logoutButton.style.display = localStorage.getItem('auth_credentials') ? 'inline-block' : 'none';
+            logoutButton.style.display = isLoggedIn ? 'inline-block' : 'none';
         }
     }
 
@@ -592,20 +602,6 @@
 
     function navigateToSection(section) {
         window.location.href = `index.html?view=${section === 'stuff' ? 'stuff' : 'organization'}`;
-    }
-
-    function logout() {
-        localStorage.removeItem('auth_credentials');
-        localStorage.removeItem('username');
-        localStorage.removeItem('role');
-        window.location.href = 'index.html';
-    }
-
-    function updateLogoutButtonVisibility() {
-        const logoutButton = document.querySelector('#logoutButton');
-        if (logoutButton) {
-            logoutButton.style.display = localStorage.getItem('auth_credentials') ? 'inline-block' : 'none';
-        }
     }
 
     // Initialize on page load
