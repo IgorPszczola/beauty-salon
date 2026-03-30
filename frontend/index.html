@@ -470,6 +470,31 @@
             margin-bottom: 0.7rem;
         }
 
+        #organizationSection .content-grid {
+            grid-template-columns: 1fr;
+        }
+
+        #organizationSection .panel {
+            width: 100%;
+            overflow-x: auto;
+        }
+
+        #organizationSection #servicesTable,
+        #organizationSection #usersTable {
+            min-width: 1100px;
+        }
+
+        #organizationSection #servicesTable th,
+        #organizationSection #servicesTable td,
+        #organizationSection #usersTable th,
+        #organizationSection #usersTable td {
+            white-space: nowrap;
+        }
+
+        #organizationSection .action-inline {
+            flex-wrap: nowrap;
+        }
+
         /* Calendar Styles */
         .calendar-wrapper {
             margin-bottom: 2rem;
@@ -770,6 +795,13 @@
             margin-top: 0.9rem;
             display: flex;
             gap: 0.7rem;
+            flex-wrap: wrap;
+            align-items: flex-end;
+            padding: 0.85rem;
+            border: 1px solid var(--outline);
+            border-radius: 1rem;
+            background: rgba(255, 255, 255, 0.58);
+        }
 
         .login-controls {
             display: flex;
@@ -777,9 +809,6 @@
             flex-wrap: wrap;
             align-items: center;
             width: 100%;
-        }
-            flex-wrap: wrap;
-            align-items: flex-end;
         }
 
         .login-form .user-info {
@@ -819,8 +848,12 @@
         table {
             width: 100%;
             border-collapse: separate;
-            border-spacing: 0 0.5rem;
+            border-spacing: 0;
             margin-top: 1rem;
+            background: rgba(255, 255, 255, 0.62);
+            border: 1px solid var(--outline);
+            border-radius: 0.9rem;
+            overflow: hidden;
         }
 
         th {
@@ -829,24 +862,131 @@
             text-transform: uppercase;
             letter-spacing: 0.12em;
             text-align: left;
-            padding: 0 0.55rem 0.25rem;
+            padding: 0.78rem 0.75rem;
+            background: rgba(241, 237, 234, 0.95);
         }
 
         td {
-            background: var(--surface-card);
+            background: transparent;
             color: var(--text);
-            padding: 0.75rem 0.55rem;
+            padding: 0.72rem 0.75rem;
             vertical-align: middle;
             font-size: 0.92rem;
+            border-top: 1px solid rgba(129, 116, 114, 0.12);
         }
 
-        tr td:first-child { border-top-left-radius: 0.72rem; border-bottom-left-radius: 0.72rem; }
-        tr td:last-child { border-top-right-radius: 0.72rem; border-bottom-right-radius: 0.72rem; }
+        tbody tr:hover td {
+            background: rgba(232, 197, 193, 0.16);
+        }
 
-        .action-inline { display: flex; gap: 0.45rem; flex-wrap: wrap; align-items: center; }
+        .action-inline {
+            display: flex;
+            gap: 0.45rem;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
         .small-btn { font-size: 0.74rem; padding: 0.42rem 0.75rem; }
         .save-btn, .password-btn, .toggle-btn { border: 1px solid var(--outline); background: var(--surface-panel); color: var(--text); }
         .small-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+        .meta-pill {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0.2rem 0.55rem;
+            border-radius: 999px;
+            border: 1px solid rgba(115, 88, 85, 0.26);
+            background: rgba(255, 255, 255, 0.72);
+            font-size: 0.74rem;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+        }
+
+        .status-pill {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 82px;
+            padding: 0.22rem 0.6rem;
+            border-radius: 999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            border: 1px solid transparent;
+            background: rgba(129, 116, 114, 0.14);
+            color: var(--text);
+        }
+
+        .status-pill.status-new {
+            background: rgba(232, 197, 193, 0.35);
+            border-color: rgba(115, 88, 85, 0.24);
+        }
+
+        .status-pill.status-confirmed,
+        .status-pill.status-done {
+            background: rgba(215, 231, 213, 0.52);
+            border-color: rgba(75, 110, 72, 0.28);
+        }
+
+        .status-pill.status-cancelled {
+            background: rgba(186, 26, 26, 0.12);
+            border-color: rgba(186, 26, 26, 0.26);
+            color: #7d1a1a;
+        }
+
+        .action-btn,
+        .small-btn,
+        .edit-service-btn,
+        .edit-appointment-btn,
+        .delete-service-btn,
+        .delete-btn,
+        .delete-user-btn-action,
+        .save-user-role-btn,
+        .reset-user-password-btn,
+        .toggle-user-enabled-btn {
+            border: 1px solid var(--outline);
+            border-radius: 999px;
+            padding: 0.38rem 0.72rem;
+            font-size: 0.73rem;
+            font-weight: 600;
+            letter-spacing: 0.03em;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: transform 0.15s ease, opacity 0.15s ease, background-color 0.15s ease;
+            background: rgba(255, 255, 255, 0.85);
+            color: var(--text);
+        }
+
+        .edit-service-btn,
+        .edit-appointment-btn,
+        .save-user-role-btn,
+        .reset-user-password-btn,
+        .toggle-user-enabled-btn {
+            background: rgba(232, 197, 193, 0.5);
+            border-color: rgba(115, 88, 85, 0.22);
+        }
+
+        .delete-service-btn,
+        .delete-btn,
+        .delete-user-btn-action {
+            background: rgba(186, 26, 26, 0.12);
+            border-color: rgba(186, 26, 26, 0.26);
+            color: #8f1d1d;
+        }
+
+        .action-btn:hover,
+        .small-btn:hover,
+        .edit-service-btn:hover,
+        .edit-appointment-btn:hover,
+        .delete-service-btn:hover,
+        .delete-btn:hover,
+        .delete-user-btn-action:hover,
+        .save-user-role-btn:hover,
+        .reset-user-password-btn:hover,
+        .toggle-user-enabled-btn:hover {
+            opacity: 0.92;
+            transform: translateY(-1px);
+        }
 
         .modal {
             display: none;
@@ -961,15 +1101,15 @@
                 Kazda wizyta to spokojna przestrzen, konsultacja i detale dopasowane do Ciebie.
             </p>
             <p class="biz-text">
-                Specjalizacje: manicure konstrukcyjny, editorial nail art, soft lash lift, rytualy pielegnacyjne dloni.
+                Specjalizacje: manicure konstrukcyjny, editorial nail art, soft lash lift, rytualy pielegnacyjne dloni, endermologia, peelingi chemiczne i enzymatyczne, zabiegi anti-age oraz rytualy pielegnacyjne twarzy i ciala.
             </p>
         </article>
         <article class="biz-card">
             <h2 style="font-size: 2rem; margin-bottom: 0.8rem;">Przykladowe prace</h2>
             <div class="works-grid">
-                <img src="https://images.unsplash.com/photo-1604902396830-aca29e19b067?auto=format&fit=crop&w=900&q=80" alt="Stylizacja 1">
-                <img src="https://images.unsplash.com/photo-1604654894610-df63bc536371?auto=format&fit=crop&w=900&q=80" alt="Stylizacja 2">
-                <img src="https://images.unsplash.com/photo-1522337660859-02fbefca4702?auto=format&fit=crop&w=900&q=80" alt="Stylizacja 3">
+                <img src="../src/assets/nails1.jpg" alt="Stylizacja 1">
+                <img src="../src/assets/nails2.jpg" alt="Stylizacja 2">
+                <img src="../src/assets/nails3.jpg" alt="Stylizacja 3">
             </div>
         </article>
     </div>
@@ -983,17 +1123,17 @@
         </div>
         <div class="services-marketing-grid">
             <article class="service-teaser">
-                <img src="https://images.unsplash.com/photo-1610992015732-2449b76344bc?auto=format&fit=crop&w=900&q=80" alt="Builder manicure">
+                <img src="../src/assets/nails4.jpg" alt="Builder manicure">
                 <h3>The Builder Manicure</h3>
                 <p>Strength meets elegance. Trwala stylizacja i naturalne wykonczenie.</p>
             </article>
             <article class="service-teaser">
-                <img src="https://images.unsplash.com/photo-1631214524020-6f9f89e8f8fe?auto=format&fit=crop&w=900&q=80" alt="Lash lift">
-                <h3>Velvet Lash Lift</h3>
+                <img src="../src/assets/nails5.jpg" alt="Lash lift">
+                <h3>Velvet Gloss Manicure</h3>
                 <p>Podkresl spojrzenie bez przesady. Efekt clean i lekki.</p>
             </article>
             <article class="service-teaser">
-                <img src="https://images.unsplash.com/photo-1519014816548-bf5fe059798b?auto=format&fit=crop&w=900&q=80" alt="Editorial nail art">
+                <img src="../src/assets/nails6.jpg" alt="Editorial nail art">
                 <h3>Editorial Nail Art</h3>
                 <p>Subtelne zdobienia, minimalistyczne linie i precyzja detalu.</p>
             </article>
@@ -1009,11 +1149,11 @@
             <span class="showcase-sub">@beenails.studio</span>
         </div>
         <div class="gallery-strip">
-            <img src="https://images.unsplash.com/photo-1519014816548-bf5fe059798b?auto=format&fit=crop&w=900&q=80" alt="Gallery 1">
-            <img src="https://images.unsplash.com/photo-1604902396830-aca29e19b067?auto=format&fit=crop&w=900&q=80" alt="Gallery 2">
-            <img src="https://images.unsplash.com/photo-1604654894610-df63bc536371?auto=format&fit=crop&w=900&q=80" alt="Gallery 3">
-            <img src="https://images.unsplash.com/photo-1522337660859-02fbefca4702?auto=format&fit=crop&w=900&q=80" alt="Gallery 4">
-            <img src="https://images.unsplash.com/photo-1512496015851-a90fb38ba796?auto=format&fit=crop&w=900&q=80" alt="Gallery 5">
+            <img src="../src/assets/nails4.jpg" alt="Gallery 1">
+            <img src="../src/assets/nails5.jpg" alt="Gallery 2">
+            <img src="../src/assets/nails6.jpg" alt="Gallery 3">
+            <img src="../src/assets/nails7.jpg" alt="Gallery 4">
+            <img src="../src/assets/nails8.jpg" alt="Gallery 5">
         </div>
     </section>
 
@@ -1026,15 +1166,15 @@
         </div>
         <div class="review-grid">
             <article class="review-item">
-                <p>"Najdokladniejszy manicure, jaki mialam od lat. Natalia ma niesamowite wyczucie stylu."</p>
+                <p>"Przepiękne paznokcie 💖 Pani Natalia bardzo dokładna i przesympatyczna , super atmosfera,paznokcie prześliczne i precyzyjnie zrobione polecam serdecznie 🤩."</p>
                 <strong>Karolina S.</strong>
             </article>
             <article class="review-item">
-                <p>"Wizyta w BeeNails to reset po tygodniu. Czysto, spokojnie i przepiekny efekt."</p>
+                <p>"Jestem bardzo zadowolona z wizyty. Przemiło spędzony czas , bardzo profesjonalne podejście. Manicure wykonany prze Panią Natalię przepiękny 🩷."</p>
                 <strong>Monika R.</strong>
             </article>
             <article class="review-item">
-                <p>"Naturalny rezultat i swietna trwalosc. Dokladnie taki salonu szukalam."</p>
+                <p>"Jestem bardzo zadowolona z manicure hybrydowego wykonywanego przez Panią Natalię, który jest staranny i precyzyjny. Polecam gorąco.."</p>
                 <strong>Ola M.</strong>
             </article>
         </div>
@@ -1494,6 +1634,12 @@
         return 'Nails';
     }
 
+    function formatStatusClass(status) {
+        return String(status || '')
+            .toLowerCase()
+            .replace(/[^a-z0-9]+/g, '-');
+    }
+
     function updateTopNavigationUI() {
         const topAuthButton = document.querySelector('#topAuthButton');
         const bookingButton = document.querySelector('#navBookingButton');
@@ -1840,10 +1986,17 @@
             <tr>
                 <td>${s.id}</td>
                 <td>${s.name}</td>
-                <td>${formatServiceCategory(s.category)}</td>
+                <td><span class="meta-pill">${formatServiceCategory(s.category)}</span></td>
                 <td>${s.price} zł</td>
                 <td>${s.duration}</td>
-                <td>${canServices || canDeleteService ? `${canServices ? `<button type="button" class="edit-service-btn" data-id="${s.id}" data-name="${s.name}" data-category="${s.category || 'NAILS'}" data-price="${s.price}" data-duration="${s.duration}" style="background: #ffc107; color: black; border: none; padding: 5px 10px; cursor: pointer; border-radius: 3px; margin-right: 5px;">Edytuj</button>` : ''}${canDeleteService ? `<button type="button" class="delete-service-btn" data-id="${s.id}" data-name="${s.name}" style="background: #dc3545; color: white; border: none; padding: 5px 10px; cursor: pointer; border-radius: 3px;">Usuń</button>` : ''}` : ''}</td>
+                <td>
+                    ${canServices || canDeleteService ? `
+                        <div class="action-inline">
+                            ${canServices ? `<button type="button" class="edit-service-btn" data-id="${s.id}" data-name="${s.name}" data-category="${s.category || 'NAILS'}" data-price="${s.price}" data-duration="${s.duration}">Edytuj</button>` : ''}
+                            ${canDeleteService ? `<button type="button" class="delete-service-btn" data-id="${s.id}" data-name="${s.name}">Usuń</button>` : ''}
+                        </div>
+                    ` : ''}
+                </td>
             </tr>
         `).join('');
         
@@ -1863,8 +2016,15 @@
                 <td>${a.clientName}</td>
                 <td>${new Date(a.appointmentTime).toLocaleString()}</td>
                 <td>${a.service ? a.service.name : 'Brak'}</td>
-                <td>${a.status}</td>
-                <td>${canAppointments ? `<button type="button" class="edit-appointment-btn" data-id="${a.id}" data-client="${a.clientName}" data-time="${a.appointmentTime}" data-service="${a.service?.id || ''}" data-status="${a.status}" data-artist="${a.artist || ''}" style="background: #ffc107; color: black; border: none; padding: 5px 10px; cursor: pointer; border-radius: 3px; margin-right: 5px;">Edytuj</button><button type="button" class="delete-btn" data-id="${a.id}" style="background: #dc3545; color: white; border: none; padding: 5px 10px; cursor: pointer; border-radius: 3px;">Usuń</button>` : ''}</td>
+                <td><span class="status-pill status-${formatStatusClass(a.status)}">${a.status}</span></td>
+                <td>
+                    ${canAppointments ? `
+                        <div class="action-inline">
+                            <button type="button" class="edit-appointment-btn" data-id="${a.id}" data-client="${a.clientName}" data-time="${a.appointmentTime}" data-service="${a.service?.id || ''}" data-status="${a.status}" data-artist="${a.artist || ''}">Edytuj</button>
+                            <button type="button" class="delete-btn" data-id="${a.id}">Usuń</button>
+                        </div>
+                    ` : ''}
+                </td>
             </tr>
         `).join('');
         

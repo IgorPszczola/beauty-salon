@@ -287,6 +287,8 @@
             font-weight: 700;
             color: var(--primary);
             font-size: 0.95rem;
+            white-space: nowrap;
+            flex-shrink: 0;
         }
 
         .service-meta {
@@ -625,8 +627,8 @@
                 </div>
                 <div class="datetime-wrap">
                     <div>
-                        <label for="appointmentDateTime">Appointment Date & Time</label>
-                        <input class="datetime-input" id="appointmentDateTime" type="datetime-local" required>
+                        <label for="appointmentDateTime">Appointment Date</label>
+                        <input class="datetime-input" id="appointmentDateTime" type="date" required>
                     </div>
                     <div>
                         <label>Quick Time Slots</label>
@@ -714,10 +716,6 @@
         selectedDateTime: ''
     };
 
-    function isCustomerRole() {
-        return getCurrentRole() === 'CUSTOMER';
-    }
-
     function getCurrentRole() {
         return localStorage.getItem('role');
     }
@@ -773,9 +771,9 @@
     function formatPrice(value) {
         const amount = Number(value);
         if (Number.isNaN(amount)) {
-            return '0.00 zl';
+            return '0.00\u00A0zl';
         }
-        return `${amount.toFixed(2)} zl`;
+        return `${amount.toFixed(2)}\u00A0zl`;
     }
 
     function formatCategory(category) {
@@ -875,19 +873,9 @@
 
         const defaultDate = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
 
-        if (isCustomerRole()) {
-            input.type = 'date';
-            input.value = defaultDate;
-            state.selectedDateTime = `${defaultDate}T${selectedSlot}`;
-        } else {
-            now.setHours(11, 0, 0, 0);
-            const timezoneAdjusted = new Date(now.getTime() - now.getTimezoneOffset() * 60000)
-                .toISOString()
-                .slice(0, 16);
-            input.type = 'datetime-local';
-            input.value = timezoneAdjusted;
-            state.selectedDateTime = input.value;
-        }
+        input.type = 'date';
+        input.value = defaultDate;
+        state.selectedDateTime = `${defaultDate}T${selectedSlot}`;
 
         updateSummary();
     }
@@ -949,12 +937,8 @@
                 return;
             }
 
-            if (isCustomerRole()) {
-                const selectedSlot = document.querySelector('.time-pill.active')?.dataset.time || '11:00';
-                state.selectedDateTime = `${selectedValue}T${selectedSlot}`;
-            } else {
-                state.selectedDateTime = selectedValue;
-            }
+            const selectedSlot = document.querySelector('.time-pill.active')?.dataset.time || '11:00';
+            state.selectedDateTime = `${selectedValue}T${selectedSlot}`;
             updateSummary();
         });
 
@@ -970,18 +954,7 @@
                 pickDefaultDateTime();
             }
 
-            if (isCustomerRole()) {
-                state.selectedDateTime = `${dateInput.value}T${pill.dataset.time}`;
-            } else {
-                const [hours, minutes] = pill.dataset.time.split(':').map(Number);
-                const selectedDate = new Date(dateInput.value);
-                selectedDate.setHours(hours, minutes, 0, 0);
-                const timezoneAdjusted = new Date(selectedDate.getTime() - selectedDate.getTimezoneOffset() * 60000)
-                    .toISOString()
-                    .slice(0, 16);
-                dateInput.value = timezoneAdjusted;
-                state.selectedDateTime = dateInput.value;
-            }
+            state.selectedDateTime = `${dateInput.value}T${pill.dataset.time}`;
 
             updateSummary();
         });
