@@ -18,4 +18,16 @@ public class Service {
     private double price;
 
     private int duration; // Duration in minutes
+
+    @Enumerated(EnumType.STRING)
+    @Column(length = 20)
+    private ServiceCategory category;
+
+    @PrePersist
+    @PreUpdate
+    void ensureCategory() {
+        if (category == null) {
+            category = ServiceCategory.NAILS;
+        }
+    }
 }

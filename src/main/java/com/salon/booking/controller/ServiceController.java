@@ -35,6 +35,7 @@ public class ServiceController {
         service.setDescription(request.getDescription());
         service.setPrice(request.getPrice());
         service.setDuration(request.getDuration());
+        service.setCategory(request.getCategory());
 
         Service savedService = serviceRepository.save(service);
         return toServiceResponse(savedService);
@@ -49,6 +50,7 @@ public class ServiceController {
         service.setDescription(request.getDescription());
         service.setPrice(request.getPrice());
         service.setDuration(request.getDuration());
+        service.setCategory(request.getCategory());
 
         Service updatedService = serviceRepository.save(service);
         return ResponseEntity.ok(toServiceResponse(updatedService));
@@ -75,7 +77,8 @@ public class ServiceController {
                 service.getName(),
                 service.getDescription(),
                 service.getPrice(),
-                service.getDuration()
+            service.getDuration(),
+            service.getCategory()
         );
     }
 }

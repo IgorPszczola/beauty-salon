@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BeeNails | The Lookbook</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif:ital,wght@0,400;0,600;1,400;1,600&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --surface: #fdf9f6;
+            --surface-low: #f7f3f0;
+            --surface-card: #ffffff;
+            --surface-panel: #f1edea;
+            --text: #1c1b1a;
+            --text-soft: #4f4443;
+            --primary: #735855;
+            --primary-soft: #e8c5c1;
+            --outline: rgba(129, 116, 114, 0.2);
+            --radius-lg: 1rem;
+            --radius-xl: 1.5rem;
+            --shadow-ambient: 0 20px 40px rgba(28, 27, 26, 0.06);
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            font-family: "Manrope", sans-serif;
+            color: var(--text);
+            background: var(--surface);
+        }
+
+        h1, h2, h3 { margin: 0; font-family: "Noto Serif", serif; font-weight: 600; }
+        p { margin: 0; }
+
+        .top-nav {
+            position: sticky;
+            top: 0;
+            z-index: 40;
+            backdrop-filter: blur(20px);
+            background: rgba(253, 249, 246, 0.82);
+        }
+
+        .nav-inner,
+        .page-wrap,
+        .footer-wrap {
+            width: min(1180px, 92vw);
+            margin: 0 auto;
+        }
+
+        .nav-inner {
+            display: grid;
+            grid-template-columns: minmax(140px, 1fr) auto minmax(140px, 1fr);
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem 0;
+        }
+
+        .brand {
+            border: 0;
+            background: transparent;
+            color: var(--text);
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.45rem;
+            font-family: "Noto Serif", serif;
+            font-style: italic;
+            font-size: 1.45rem;
+            padding: 0;
+            justify-self: start;
+        }
+
+        .brand-logo {
+            width: 1.4rem;
+            height: 1.4rem;
+            object-fit: cover;
+            border-radius: 0.35rem;
+        }
+
+        .brand-label {
+            line-height: 1;
+        }
+
+        .nav-center {
+            display: none;
+            gap: 1rem;
+            align-items: center;
+            flex-wrap: wrap;
+            justify-self: center;
+        }
+
+        #loginButton,
+        #logoutButton {
+            justify-self: end;
+            width: auto;
+        }
+
+        .nav-center a,
+        .nav-center button {
+            color: var(--text-soft);
+            text-decoration: none;
+            font-family: "Noto Serif", serif;
+            font-size: 0.95rem;
+            border: 0;
+            background: transparent;
+            cursor: pointer;
+            border-bottom: 1px solid transparent;
+            transition: color 0.15s ease, border-color 0.15s ease;
+            padding-bottom: 0.1rem;
+        }
+
+        .nav-center a.active,
+        .nav-center a:hover,
+        .nav-center button:hover {
+            color: var(--text);
+            border-color: rgba(129, 116, 114, 0.45);
+        }
+
+        .hero-btn {
+            border: 0;
+            border-radius: 999px;
+            padding: 0.62rem 1.1rem;
+            cursor: pointer;
+            font-family: "Manrope", sans-serif;
+            font-size: 0.8rem;
+            font-weight: 600;
+            letter-spacing: 0.03em;
+            text-transform: uppercase;
+            color: #fff;
+            background: linear-gradient(135deg, var(--primary), var(--primary-soft));
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: opacity 0.15s ease, transform 0.15s ease;
+        }
+
+        .hero-btn:hover {
+            opacity: 0.92;
+            transform: translateY(-1px);
+        }
+
+        .page-wrap {
+            padding: 2.4rem 0 4rem;
+        }
+
+        .lookbook-hero {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4rem;
+            margin-bottom: 2rem;
+            align-items: center;
+        }
+
+        .hero-content {
+            background: transparent;
+            padding: 0;
+        }
+
+        .hero-text-right {
+            padding-top: 0;
+        }
+
+        .eyebrow {
+            display: block;
+            text-transform: uppercase;
+            letter-spacing: 0.25em;
+            font-size: 0.7rem;
+            color: var(--primary);
+            margin-bottom: 1.5rem;
+            font-weight: 700;
+        }
+
+        .hero-title {
+            font-size: clamp(3.5rem, 8vw, 5.5rem);
+            line-height: 1.1;
+            max-width: 100%;
+            margin-bottom: 0;
+            letter-spacing: -0.02em;
+            font-style: italic;
+            font-weight: 400;
+            white-space: nowrap;
+        }
+
+        .hero-title span {
+            display: inline;
+        }
+
+        .hero-copy {
+            max-width: 100%;
+            color: var(--text-soft);
+            line-height: 1.75;
+            font-size: 1.25rem;
+            margin-bottom: 0;
+        }
+
+        .hero-image {
+            width: min(100%, 440px);
+            border-radius: var(--radius-xl);
+            object-fit: cover;
+            min-height: 260px;
+            max-height: 430px;
+            box-shadow: none;
+            justify-self: end;
+        }
+
+        .lookbook-controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.8rem;
+            margin-bottom: 3rem;
+            margin-top: 2rem;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .filter-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.6rem;
+        }
+
+        .filter-btn {
+            border: 1px solid var(--outline);
+            background: transparent;
+            color: var(--text);
+            padding: 0.5rem 1rem;
+            border-radius: 999px;
+            font-family: "Manrope", sans-serif;
+            font-size: 0.85rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+
+        .filter-btn:hover,
+        .filter-btn.active {
+            background: var(--primary);
+            color: #fff;
+            border-color: var(--primary);
+        }
+
+        .lookbook-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1.2rem;
+            margin-bottom: 3rem;
+        }
+
+        .lookbook-item {
+            position: relative;
+            aspect-ratio: 4/5;
+            overflow: hidden;
+            border-radius: var(--radius-lg);
+            cursor: pointer;
+        }
+
+        .lookbook-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.3s ease;
+        }
+
+        .lookbook-item:hover img {
+            transform: scale(1.05);
+        }
+
+        .lookbook-meta {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(to top, rgba(0,0,0,0.7), transparent);
+            padding: 1.5rem 1.2rem 1.2rem;
+            color: #fff;
+            opacity: 0;
+            transition: opacity 0.25s ease;
+        }
+
+        .lookbook-item:hover .lookbook-meta {
+            opacity: 1;
+        }
+
+        .lookbook-name {
+            font-family: "Noto Serif", serif;
+            font-size: 1.15rem;
+            font-weight: 600;
+            margin-bottom: 0.3rem;
+        }
+
+        .lookbook-category {
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            opacity: 0.9;
+        }
+
+        .lookbook-heart {
+            position: absolute;
+            top: 1rem;
+            left: 1rem;
+            background: rgba(255,255,255,0.2);
+            border: 0;
+            color: #fff;
+            width: 2.2rem;
+            height: 2.2rem;
+            border-radius: 999px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            opacity: 0;
+            transition: all 0.25s ease;
+        }
+
+        .lookbook-item:hover .lookbook-heart {
+            opacity: 1;
+        }
+
+        .lookbook-heart:hover {
+            background: rgba(255,255,255,0.4);
+        }
+
+        .cta-section {
+            background: var(--surface-panel);
+            border-radius: var(--radius-xl);
+            padding: 3rem;
+            text-align: center;
+            margin: 3rem 0;
+        }
+
+        .cta-title {
+            font-size: clamp(1.8rem, 5vw, 3rem);
+            margin-bottom: 1rem;
+        }
+
+        .cta-copy {
+            color: var(--text-soft);
+            line-height: 1.6;
+            max-width: 50ch;
+            margin: 0 auto 2rem;
+            font-size: 1rem;
+        }
+
+        .cta-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            justify-content: center;
+        }
+
+        .cta-primary {
+            border: 0;
+            border-radius: 999px;
+            padding: 0.8rem 2rem;
+            cursor: pointer;
+            font-family: "Manrope", sans-serif;
+            font-size: 0.9rem;
+            font-weight: 600;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            color: #fff;
+            background: linear-gradient(135deg, var(--primary), var(--primary-soft));
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: opacity 0.15s ease, transform 0.15s ease;
+        }
+
+        .cta-primary:hover {
+            opacity: 0.92;
+            transform: translateY(-2px);
+        }
+
+        .cta-secondary {
+            border: 1px solid var(--outline);
+            background: transparent;
+            color: var(--text);
+            border-radius: 999px;
+            padding: 0.8rem 2rem;
+            cursor: pointer;
+            font-family: "Manrope", sans-serif;
+            font-size: 0.9rem;
+            font-weight: 600;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            transition: all 0.15s ease;
+        }
+
+        .cta-secondary:hover {
+            background: var(--surface-card);
+            border-color: var(--text-soft);
+        }
+
+        .footer-wrap {
+            padding: 1.3rem 0 2rem;
+            color: var(--text-soft);
+            font-size: 0.84rem;
+        }
+
+        .status-box {
+            background: var(--surface-card);
+            border-radius: var(--radius-lg);
+            padding: 1rem;
+            color: var(--text-soft);
+            text-align: center;
+        }
+
+        @media (max-width: 919px) {
+            .lookbook-hero {
+                grid-template-columns: 1fr;
+                gap: 2rem;
+                align-items: start;
+                margin-bottom: 2rem;
+            }
+        }
+
+        @media (min-width: 920px) {
+            .nav-center { display: flex; }
+            .lookbook-grid {
+                grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            }
+            .cta-section {
+                padding: 4rem;
+            }
+        }
+    </style>
+</head>
+<body>
+<header class="top-nav">
+    <div class="nav-inner">
+        <button class="brand" onclick="window.location.href='index.html'">
+            <img class="brand-logo" src="../src/assets/BeeNails.png" alt="BeeNails logo">
+            <span class="brand-label">BeeNails</span>
+        </button>
+        <nav class="nav-center" aria-label="Primary">
+            <a href="services.html">Services</a>
+            <a class="active" href="lookbook.html">Gallery</a>
+            <a href="index.html#reviewsSection">Reviews</a>
+            <button type="button" id="navBookingButton" style="display: none;" onclick="window.location.href='booking.html'">Book</button>
+            <button type="button" id="navStuffButton" style="display: none;" onclick="navigateToSection('stuff')">Stuff</button>
+            <button type="button" id="navOrganizationButton" style="display: none;" onclick="navigateToSection('organization')">Organization</button>
+        </nav>
+        <button type="button" class="hero-btn" id="loginButton" onclick="window.location.href='index.html'" style="display: none;">Zaloguj</button>
+        <button type="button" class="hero-btn" id="logoutButton" onclick="logout()" style="display: none;">Wyloguj</button>
+    </div>
+</header>
+
+<main class="page-wrap">
+    <section class="lookbook-hero">
+        <div class="hero-content">
+            <span class="eyebrow">Our Portfolio</span>
+            <h1 class="hero-title">The Lookbook</h1>
+        </div>
+        <div class="hero-text-right">
+            <p class="hero-copy">
+                A curated collection of our finest work. Each piece is an intentional expression of art, crafted with precision and soul.
+            </p>
+        </div>
+    </section>
+
+    <div class="lookbook-controls">
+        <div class="filter-buttons">
+            <button class="filter-btn active" data-filter="all">All Works</button>
+            <button class="filter-btn" data-filter="nails">Nail Art</button>
+            <button class="filter-btn" data-filter="lashes">Lash Extensions</button>
+            <button class="filter-btn" data-filter="skin">Facials</button>
+        </div>
+    </div>
+
+    <div id="lookbookState" class="status-box">Ładowanie galerii...</div>
+    <div id="lookbookGrid" class="lookbook-grid" style="display: none;"></div>
+
+    <section class="cta-section">
+        <h2 class="cta-title">Gotowy na swoją <span style="font-style: italic;">transformację?</span></h2>
+        <p class="cta-copy">
+            Zarezerwuje godzinę. Zalecamy zarezerwowanie co najmniej dwa tygodnie wcześniej, aby zapewnić sobie pożądaną godzinę.
+        </p>
+        <div class="cta-buttons">
+            <button class="cta-primary" onclick="window.location.href='services.html'">View Services</button>
+            <button class="cta-secondary" onclick="alert('Gift Cards coming soon!')">Gift Cards</button>
+        </div>
+    </section>
+</main>
+
+<footer class="footer-wrap">BeeNails | Gallery & Lookbook</footer>
+
+<script>
+    // Sample gallery data with different categories
+    const galleryData = [
+        { id: 1, title: 'The Gilded Muse', category: 'nails', image: '../src/assets/nails1.jpg' },
+        { id: 2, title: 'Luminous Glow', category: 'skin', image: '../src/assets/nails2.jpg' },
+        { id: 3, title: 'Velvet Lashes', category: 'lashes', image: '../src/assets/nails3.jpg' },
+        { id: 4, title: 'The Crafting Table', category: 'nails', image: '../src/assets/nails4.jpg' },
+        { id: 5, title: 'Minimalist Modern', category: 'nails', image: '../src/assets/nails5.jpg' },
+        { id: 6, title: 'Seasonal Capsule', category: 'skin', image: '../src/assets/nails6.jpg' },
+        { id: 7, title: 'The Clean Girl', category: 'skin', image: '../src/assets/nails7.jpg' },
+        { id: 8, title: 'Neon Dreams', category: 'nails', image: '../src/assets/nails8.jpg' },
+        { id: 9, title: 'Lash Lift Pro', category: 'lashes', image: '../src/assets/nails1.jpg' },
+        { id: 10, title: 'Matte Elegance', category: 'nails', image: '../src/assets/nails2.jpg' },
+        { id: 11, title: 'Rose Garden', category: 'skin', image: '../src/assets/nails3.jpg' },
+        { id: 12, title: 'The Statement Art', category: 'nails', image: '../src/assets/nails4.jpg' }
+    ];
+
+    let currentFilter = 'all';
+
+    function logout() {
+        localStorage.removeItem('auth_credentials');
+        localStorage.removeItem('username');
+        localStorage.removeItem('role');
+        window.location.href = 'index.html';
+    }
+
+    function updateLogoutButtonVisibility() {
+        const loginButton = document.querySelector('#loginButton');
+        const logoutButton = document.querySelector('#logoutButton');
+        const isLoggedIn = Boolean(localStorage.getItem('auth_credentials'));
+
+        if (loginButton) {
+            loginButton.style.display = isLoggedIn ? 'none' : 'inline-block';
+        }
+
+        if (logoutButton) {
+            logoutButton.style.display = isLoggedIn ? 'inline-block' : 'none';
+        }
+    }
+
+    function renderGallery(filter = 'all') {
+        const stateNode = document.querySelector('#lookbookState');
+        const gridNode = document.querySelector('#lookbookGrid');
+
+        const filtered = filter === 'all' 
+            ? galleryData 
+            : galleryData.filter(item => item.category === filter);
+
+        if (!filtered.length) {
+            stateNode.textContent = 'Brak zdjęć w tej kategorii.';
+            stateNode.style.display = 'block';
+            gridNode.style.display = 'none';
+            return;
+        }
+
+        const markup = filtered.map(item => `
+            <div class="lookbook-item">
+                <img src="${item.image}" alt="${item.title}">
+                <button class="lookbook-heart" onclick="toggleLike(event)">♡</button>
+                <div class="lookbook-meta">
+                    <div class="lookbook-name">${item.title}</div>
+                    <div class="lookbook-category">${item.category}</div>
+                </div>
+            </div>
+        `).join('');
+
+        gridNode.innerHTML = markup;
+        stateNode.style.display = 'none';
+        gridNode.style.display = 'grid';
+    }
+
+    function toggleLike(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        const btn = e.currentTarget;
+        btn.textContent = btn.textContent === '♡' ? '♥' : '♡';
+    }
+
+    // Filter buttons
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            currentFilter = btn.dataset.filter;
+            renderGallery(currentFilter);
+        });
+    });
+
+    // Role-based navigation
+    function getCurrentRole() {
+        return localStorage.getItem('role');
+    }
+
+    function canAccessCustomerBooking() {
+        const role = getCurrentRole();
+        return role === 'CUSTOMER' || role === 'OWNER' || role === 'ADMIN';
+    }
+
+    function canManageAppointments() {
+        const role = getCurrentRole();
+        return role === 'ADMIN' || role === 'OWNER' || role === 'STAFF';
+    }
+
+    function canManageServices() {
+        const role = getCurrentRole();
+        return role === 'ADMIN' || role === 'OWNER';
+    }
+
+    function updateLookbookNavUI() {
+        const bookingButton = document.querySelector('#navBookingButton');
+        const stuffButton = document.querySelector('#navStuffButton');
+        const organizationButton = document.querySelector('#navOrganizationButton');
+
+        if (bookingButton) {
+            bookingButton.style.display = canAccessCustomerBooking() ? 'inline-block' : 'none';
+        }
+
+        if (stuffButton) {
+            stuffButton.style.display = canManageAppointments() ? 'inline-block' : 'none';
+        }
+        if (organizationButton) {
+            organizationButton.style.display = canManageServices() ? 'inline-block' : 'none';
+        }
+    }
+
+    function navigateToSection(section) {
+        window.location.href = `index.html?view=${section === 'stuff' ? 'stuff' : 'organization'}`;
+    }
+
+    // Initialize on page load
+    updateLookbookNavUI();
+    updateLogoutButtonVisibility();
+    renderGallery();
+</script>
+</body>
+</html>
